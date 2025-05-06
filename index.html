@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Parsed Data Visualizer</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    #controls { padding: 1em; background: #f9f9f9; }
+    #summary { padding: 1em; }
+    #chartContainer { width: 90%; max-width: 800px; margin: 1em auto; }
+    #threeContainer { width: 100%; height: 400px; display: block; }
+    canvas { background: #fff; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <input type="file" id="fileInput" accept=".txt"/>
+  </div>
+  <div id="summary"></div>
+  <div id="chartContainer">
+    <canvas id="chart"></canvas>
+  </div>
+  <div id="threeContainer"></div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+
+  <script>
+  (function(){
+    const fileInput = document.getElementById('fileInput');
+    const summaryDiv = document.getElementById('summary');
+    const ctx = document.getElementById('chart').getContext('2d');
+    const threeContainer = document.getElementById('threeContainer');
+    let chart, scene, camera, renderer, spheres, adcChannels, sampleRate;
+
+    fileInput.addEventListener('change', e => {
+      if (!e.target.files.length) return;
+      const fr = new FileReader();
+      fr.onload = () => parseAndVisualize(fr.result);
+      fr.readAsText(e.target.files[0]);
+    });
+
+    function parseAndVisualize(txt) {
+      // 1) split into sections by blank line
+      const sections = txt.split(/\r?\n\r?\n/);
+      // 2) find the ADC section
+      const adcSec = sections.find(s => s.match(/^ADCSampleRate/i));
+      if (!adcSec) { alert("No ADCSampleRate section found"); return; }
+
+      const lines = adcSec.trim().split(/\r?\n/);
+      // parse sampleRate
+      const rateLine = lines.shift();
+      sampleRate = parseFloat(rateLine.split(':')[1]) || 1;
+      // skip until buffer header
+      while(lines.length && !lines[0].endsWith('Buffer')) lines.shift();
+      lines.shift();              // remove "XXXBuffer"
+      const colHeader = lines.shift(); // e.g. "Front[psi]Right[psi]..."
+      const channelNames = ['Front','Right','Back','Left','Top'];
+
+      // parse numeric data
+      const dataLines = lines.filter(l => /^\s*[-\d.]+\s+/.test(l));
+      const raw = dataLines.map(l => l.trim().split(/\s+/).map(parseFloat));
+      // transpose: array per channel
+      adcChannels = channelNames.map((_,ci)=> raw.map(row=> row[ci]));
+
+      // 3) summarize
+      const stats = adcChannels.map(arr=> {
+        const min = Math.min(...arr), max = Math.max(...arr);
+        const avg = arr.reduce((a,b)=>a+b,0)/arr.length;
+        return {min,max,avg};
+      });
+      renderSummary(channelNames, stats);
+
+      // 4) chart
+      renderChart(channelNames, adcChannels, sampleRate);
+
+      // 5) three.js
+      initThree(channelNames);
+      animateThree();
+    }
+
+    function renderSummary(names, stats){
+      let html = '<h3>ADC Summary (psi)</h3><table><tr><th>Sensor</th><th>Min</th><th>Avg</th><th>Max</th></tr>';
+      names.forEach((n,i)=>{
+        html += `<tr><td>${n}</td>
+                 <td>${stats[i].min.toFixed(2)}</td>
+                 <td>${stats[i].avg.toFixed(2)}</td>
+                 <td>${stats[i].max.toFixed(2)}</td></tr>`;
+      });
+      html += '</table>';
+      summaryDiv.innerHTML = html;
+    }
+
+    function renderChart(names, channels, rate){
+      const labels = channels[0].map((_,i)=> (i/rate).toFixed(2) );
+      const datasets = names.map((n,i)=> ({
+        label: n,
+        data: channels[i],
+        borderWidth: 1,
+        fill: false
+      }));
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          scales: {
+            x: { display: true, title: { display: true, text: 'Time (s)' } },
+            y: { display: true, title: { display: true, text: 'Pressure' } }
+          }
+        }
+      });
+    }
+
+    // Three.js 3D view of over-pressure
+    function initThree(names){
+      // clear old if any
+      threeContainer.innerHTML = '';
+      scene    = new THREE.Scene();
+      camera   = new THREE.PerspectiveCamera(45, threeContainer.clientWidth/threeContainer.clientHeight, 0.1, 1000);
+      renderer = new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+      threeContainer.appendChild(renderer.domElement);
+      // camera & light
+      camera.position.set(3,3,5);
+      scene.add(new THREE.AmbientLight(0x888888));
+      const dl = new THREE.DirectionalLight(0xffffff,0.8);
+      dl.position.set(5,5,5); scene.add(dl);
+
+      // sensor positions
+      const posMap = {
+        Front: new THREE.Vector3(0, 1, 0),
+        Right: new THREE.Vector3(1, 0, 0),
+        Back:  new THREE.Vector3(0,-1, 0),
+        Left:  new THREE.Vector3(-1, 0, 0),
+        Top:   new THREE.Vector3(0, 0, 1)
+      };
+
+      spheres = {};
+      names.forEach(n=>{
+        const geo = new THREE.SphereGeometry(0.1,16,16);
+        const mat = new THREE.MeshStandardMaterial({color: Math.random()*0xddddff});
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(posMap[n]);
+        scene.add(mesh);
+        spheres[n] = mesh;
+      });
+    }
+
+    let frame = 0;
+    function animateThree(){
+      requestAnimationFrame(animateThree);
+      if (adcChannels){
+        // loop or clamp
+        const idx = frame % adcChannels[0].length;
+        Object.keys(spheres).forEach((n,i)=>{
+          const val = adcChannels[i][idx];
+          const scale = 0.2 + val/Math.max(...adcChannels[i]); // normalize
+          spheres[n].scale.set(scale,scale,scale);
+        });
+        frame++;
+      }
+      renderer.render(scene, camera);
+    }
+
+  })();
+  </script>
+</body>
+</html>
