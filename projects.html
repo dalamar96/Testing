@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Overview Dashboard (Full POC)</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: #0b1220;
+    color: #e2e8f0;
+}
+
+.header {
+    padding: 14px 18px;
+    background: #020617;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    justify-content: space-between;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 14px;
+}
+
+/* CARD */
+.card {
+    border: 1px solid #1e293b;
+    background: #020617;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.title {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.meta {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+/* STATUS */
+.status {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.green { color: #4ade80; }
+.yellow { color: #facc15; }
+.red { color: #f87171; }
+
+/* KPI ROW */
+.kpis {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+}
+
+.kpi {
+    background: #1e293b;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    font-size: 11px;
+}
+
+/* ACCORDION */
+.section {
+    border-top: 1px solid #1e293b;
+    padding: 8px 0;
+    cursor: pointer;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.content {
+    display: none;
+    padding: 8px 0;
+    font-size: 12px;
+}
+
+/* NOTES */
+.note {
+    border-left: 2px solid #3b82f6;
+    padding-left: 8px;
+    margin-bottom: 6px;
+}
+
+/* TIMELINE */
+.timeline {
+    border-left: 2px solid #1e293b;
+    padding-left: 10px;
+}
+
+.event {
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Project Overview Dashboard</h1>
+    <div class="meta">ADO Portfolio Intelligence View</div>
+</div>
+
+<div class="container" id="app"></div>
+
+<script>
+
+const projects = [
+{
+    id: 1,
+    name: "Checkout Platform",
+    status: "Healthy",
+    stateColor: "green",
+    created: "2025-11-01",
+    updated: "2026-04-18",
+    workItems: { Bug: 12, Feature: 8, Task: 14 },
+    stateCounts: { "In Progress": 9, "QA": 5, "Blocked": 3, "Done": 17 },
+    notes: [
+        {date:"2026-04-10", text:"Revenue-critical bug introduced in retry flow"},
+        {date:"2026-04-12", text:"Hotfix deployed, monitoring stability"},
+        {date:"2026-04-18", text:"QA backlog increasing slightly"}
+    ],
+    timeline: [
+        "2026-04-01 - Sprint started",
+        "2026-04-05 - Payment bug detected",
+        "2026-04-10 - Emergency patch deployed",
+        "2026-04-15 - QA bottleneck identified"
+    ]
+},
+{
+    id: 2,
+    name: "Analytics Portal",
+    status: "At Risk",
+    stateColor: "yellow",
+    created: "2025-12-15",
+    updated: "2026-04-17",
+    workItems: { Bug: 5, Feature: 16, Task: 7 },
+    stateCounts: { "In Progress": 6, "QA": 7, "Blocked": 2, "Done": 13 },
+    notes: [
+        {date:"2026-04-02", text:"Dashboard redesign approved"},
+        {date:"2026-04-08", text:"Performance issues reported in QA"},
+        {date:"2026-04-16", text:"Data aggregation latency increasing"}
+    ],
+    timeline: [
+        "2026-04-01 - Sprint started",
+        "2026-04-08 - QA slowdown begins",
+        "2026-04-12 - API refactor started",
+        "2026-04-17 - Risk flagged"
+    ]
+},
+{
+    id: 3,
+    name: "Core Authentication System",
+    status: "Blocked",
+    stateColor: "red",
+    created: "2025-10-10",
+    updated: "2026-04-16",
+    workItems: { Bug: 9, Feature: 4, Task: 11 },
+    stateCounts: { "In Progress": 3, "QA": 2, "Blocked": 8, "Done": 11 },
+    notes: [
+        {date:"2026-04-03", text:"DB schema dependency delaying progress"},
+        {date:"2026-04-09", text:"Security review expanded scope"},
+        {date:"2026-04-16", text:"Still blocked on infrastructure approval"}
+    ],
+    timeline: [
+        "2026-03-28 - Refactor started",
+        "2026-04-03 - DB schema blocker introduced",
+        "2026-04-09 - Security audit expanded scope",
+        "2026-04-16 - No resolution"
+    ]
+},
+{
+    id: 4,
+    name: "Mobile App Experience",
+    status: "Healthy",
+    stateColor: "green",
+    created: "2025-09-20",
+    updated: "2026-04-18",
+    workItems: { Bug: 18, Feature: 12, Task: 9 },
+    stateCounts: { "In Progress": 10, "QA": 4, "Blocked": 1, "Done": 24 },
+    notes: [
+        {date:"2026-04-06", text:"UI refresh improved engagement"},
+        {date:"2026-04-14", text:"Crash rate reduced significantly"},
+        {date:"2026-04-18", text:"Stability confirmed across devices"}
+    ],
+    timeline: [
+        "2026-03-15 - Sprint ongoing",
+        "2026-04-06 - UI overhaul",
+        "2026-04-12 - Crash fix release",
+        "2026-04-18 - Stable baseline"
+    ]
+},
+{
+    id: 5,
+    name: "Reporting & BI Layer",
+    status: "At Risk",
+    stateColor: "yellow",
+    created: "2025-12-01",
+    updated: "2026-04-19",
+    workItems: { Bug: 6, Feature: 20, Task: 5 },
+    stateCounts: { "In Progress": 8, "QA": 9, "Blocked": 2, "Done": 12 },
+    notes: [
+        {date:"2026-04-05", text:"Schema changes increased QA load"},
+        {date:"2026-04-11", text:"Regression issues found"},
+        {date:"2026-04-19", text:"QA saturation detected"}
+    ],
+    timeline: [
+        "2026-03-25 - Expansion started",
+        "2026-04-05 - Schema changes",
+        "2026-04-11 - Regression issues",
+        "2026-04-19 - QA overload"
+    ]
+},
+{
+    id: 6,
+    name: "DevOps Automation Pipeline",
+    status: "Healthy",
+    stateColor: "green",
+    created: "2025-08-01",
+    updated: "2026-04-17",
+    workItems: { Bug: 3, Feature: 14, Task: 22 },
+    stateCounts: { "In Progress": 7, "QA": 3, "Blocked": 0, "Done": 29 },
+    notes: [
+        {date:"2026-04-02", text:"Pipeline speed improvements deployed"},
+        {date:"2026-04-10", text:"Build time reduced by 22%"},
+        {date:"2026-04-17", text:"Stable and optimized"}
+    ],
+    timeline: [
+        "2026-03-10 - Optimization sprint",
+        "2026-04-02 - CI improvements",
+        "2026-04-10 - Performance gains",
+        "2026-04-17 - Stable baseline"
+    ]
+}
+];
+
+function render(){
+    const app = document.getElementById("app");
+    app.innerHTML = "";
+
+    projects.forEach(p=>{
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <div class="title">${p.name}</div>
+            <div class="meta">
+                Created: ${p.created} | Updated: ${p.updated}
+            </div>
+
+            <div class="status ${p.stateColor}">
+                Status: ${p.status}
+            </div>
+
+            <div class="kpis">
+                <div class="kpi">Bugs: ${p.workItems.Bug}</div>
+                <div class="kpi">Features: ${p.workItems.Feature}</div>
+                <div class="kpi">Tasks: ${p.workItems.Task}</div>
+            </div>
+
+            <div class="grid">
+                <div>In Progress: ${p.stateCounts["In Progress"]}</div>
+                <div>QA: ${p.stateCounts["QA"]}</div>
+                <div>Blocked: ${p.stateCounts["Blocked"]}</div>
+            </div>
+
+            <div class="section" onclick="toggle(this)">
+                📌 Notes (Chronological)
+            </div>
+            <div class="content">
+                ${p.notes.map(n=>`
+                    <div class="note">
+                        <strong>${n.date}</strong><br/>
+                        ${n.text}
+                    </div>
+                `).join("")}
+            </div>
+
+            <div class="section" onclick="toggle(this)">
+                📈 Timeline (All Work Items)
+            </div>
+            <div class="content timeline">
+                ${p.timeline.map(t=>`
+                    <div class="event">• ${t}</div>
+                `).join("")}
+            </div>
+        `;
+
+        app.appendChild(div);
+    });
+}
+
+function toggle(el){
+    const content = el.nextElementSibling;
+    content.style.display = content.style.display === "block" ? "none" : "block";
+}
+
+render();
+
+</script>
+
+</body>
+</html>
