@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Flow Dashboard</title>
+<title>Project Briefing Dashboard</title>
 
 <style>
 body {
@@ -22,30 +22,24 @@ body {
 }
 
 .container {
-    max-width: 1300px;
+    max-width: 1100px;
     margin: auto;
     padding: 14px;
 }
 
-/* GRID */
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-}
-
 /* CARD */
 .card {
-    border: 1px solid #1e293b;
     background: #020617;
+    border: 1px solid #1e293b;
     border-radius: 10px;
     padding: 14px;
-    min-height: 420px;
+    margin-bottom: 14px;
 }
 
+/* HEADER */
 .title {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
 }
 
 .meta {
@@ -54,100 +48,75 @@ body {
 }
 
 /* STATUS */
-.status.green { color: #4ade80; }
-.status.yellow { color: #facc15; }
-.status.red { color: #f87171; }
+.status {
+    font-size: 12px;
+    font-weight: bold;
+}
+.green { color: #4ade80; }
+.yellow { color: #facc15; }
+.red { color: #f87171; }
 
-/* HORIZONTAL STRUCTURE */
-.header-row {
+/* GRID SECTIONS */
+.grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     margin-top: 12px;
+}
+
+.block {
+    background: #0b1220;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.block h4 {
+    margin: 0 0 6px 0;
     font-size: 12px;
     color: #94a3b8;
 }
 
-/* FLOW ROWS */
-.flow-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+/* TAGS */
+.tag {
+    display: inline-block;
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    background: #1e293b;
+    margin: 2px;
+}
+
+/* TRIAGE METRICS */
+.metrics {
+    display: flex;
     gap: 8px;
+    flex-wrap: wrap;
     margin-top: 6px;
 }
 
-/* CELL */
-.cell {
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    padding: 8px;
-    text-align: center;
+.metric {
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: #1e293b;
 }
 
-/* STATUS COLORS (MEANINGFUL NOW) */
-.new {
-    background: rgba(59,130,246,0.15);
-    color: #60a5fa;
-}
-
-.progress {
-    background: rgba(250,204,21,0.12);
-    color: #facc15;
-}
-
-.done {
-    background: rgba(74,222,128,0.12);
-    color: #4ade80;
-}
-
-.blocked {
-    background: rgba(248,113,113,0.12);
-    color: #f87171;
-}
-
-/* SECTION */
-.section {
-    border-top: 1px solid #1e293b;
-    padding: 8px 0;
-    cursor: pointer;
-    font-size: 12px;
-    color: #94a3b8;
-}
-
-.content {
-    display: none;
-    padding: 8px 0;
-    font-size: 12px;
-}
-
-.note {
-    border-left: 2px solid #3b82f6;
-    padding-left: 8px;
-    margin-bottom: 6px;
-}
-
-.timeline {
-    border-left: 2px solid #1e293b;
-    padding-left: 10px;
-}
-
-.event {
-    margin-bottom: 6px;
-    font-size: 12px;
-}
+/* PRIORITY COLORS */
+.p1 { border-left: 3px solid #ef4444; }
+.p2 { border-left: 3px solid #f59e0b; }
+.p3 { border-left: 3px solid #3b82f6; }
 </style>
 </head>
 
 <body>
 
 <div class="header">
-    <h1>Project Flow Dashboard</h1>
-    <div class="meta">Horizontal Work System View (ADO-style flow map)</div>
+    <h1>Project Briefing Dashboard</h1>
+    <div class="meta">ADO + Triage Intelligence View</div>
 </div>
 
-<div class="container">
-    <div class="grid" id="app"></div>
-</div>
+<div class="container" id="app"></div>
 
 <script>
 
@@ -156,56 +125,108 @@ const projects = [
     name: "Checkout Platform",
     status: "Healthy",
     color: "green",
-    created: "2025-11-01",
-    updated: "2026-04-18",
 
-    flow: {
-        Epics:    { new: 2, progress: 3, done: 5, blocked: 1 },
-        Features: { new: 4, progress: 3, done: 5, blocked: 0 },
-        Bugs:     { new: 3, progress: 6, done: 3, blocked: 2 },
-        Tasks:    { new: 5, progress: 6, done: 3, blocked: 0 }
+    ado: {
+        epics: 5,
+        features: 12,
+        bugs: 24,
+        tasks: 18
     },
 
-    notes: [
-        {date:"2026-04-10", text:"Revenue bug spike in retry flow"},
-        {date:"2026-04-12", text:"Hotfix stabilized system"},
-        {date:"2026-04-18", text:"QA backlog rising slightly"}
+    triage: {
+        priority: "P1",
+        urgency: "High",
+        effort: "Large",
+        risk: "Medium"
+    },
+
+    roles: {
+        dev: 3,
+        dba: 1,
+        ba: 2,
+        tester: 2
+    },
+
+    attention: [
+        "QA queue growing",
+        "One critical bug in retry flow",
+        "Performance spike under load"
     ],
 
-    timeline: [
-        "2026-04-01 - Sprint started",
-        "2026-04-05 - Incident detected",
-        "2026-04-10 - Hotfix deployed",
-        "2026-04-15 - QA bottleneck"
-    ]
+    created: "2025-11-01",
+    updated: "2026-04-18"
 },
 
 {
     name: "Analytics Portal",
     status: "At Risk",
     color: "yellow",
-    created: "2025-12-15",
-    updated: "2026-04-17",
 
-    flow: {
-        Epics:    { new: 1, progress: 4, done: 2, blocked: 0 },
-        Features: { new: 6, progress: 5, done: 5, blocked: 1 },
-        Bugs:     { new: 2, progress: 3, done: 2, blocked: 1 },
-        Tasks:    { new: 3, progress: 4, done: 3, blocked: 0 }
+    ado: {
+        epics: 3,
+        features: 16,
+        bugs: 10,
+        tasks: 12
     },
 
-    notes: [
-        {date:"2026-04-08", text:"QA slowdown began"},
-        {date:"2026-04-12", text:"API refactor increasing load"},
-        {date:"2026-04-17", text:"Risk escalated due to QA saturation"}
+    triage: {
+        priority: "P2",
+        urgency: "Medium",
+        effort: "Large",
+        risk: "High"
+    },
+
+    roles: {
+        dev: 4,
+        dba: 1,
+        ba: 2,
+        tester: 3
+    },
+
+    attention: [
+        "QA bottleneck forming",
+        "Performance regression in dashboard",
+        "API latency increasing"
     ],
 
-    timeline: [
-        "2026-04-01 - Epic started",
-        "2026-04-08 - QA slowdown",
-        "2026-04-12 - Refactor begins",
-        "2026-04-17 - Risk flagged"
-    ]
+    created: "2025-12-15",
+    updated: "2026-04-17"
+},
+
+{
+    name: "Core Authentication System",
+    status: "Blocked",
+    color: "red",
+
+    ado: {
+        epics: 2,
+        features: 4,
+        bugs: 11,
+        tasks: 9
+    },
+
+    triage: {
+        priority: "P1",
+        urgency: "Critical",
+        effort: "Large",
+        risk: "High"
+    },
+
+    roles: {
+        dev: 2,
+        dba: 2,
+        ba: 1,
+        tester: 1
+    },
+
+    attention: [
+        "DB schema blocking all progress",
+        "Security review pending",
+        "No movement in 6 days"
+    ],
+
+    created: "2025-10-10",
+    updated: "2026-04-16"
 }
 ];
 
@@ -215,67 +236,56 @@ function render(){
 
     projects.forEach(p=>{
         const div = document.createElement("div");
-        div.className = "card";
+        div.className = `card p${p.triage.priority.slice(1)}`;
 
         div.innerHTML = `
             <div class="title">${p.name}</div>
-            <div class="meta">Created: ${p.created} | Updated: ${p.updated}</div>
+            <div class="meta">
+                Created: ${p.created} | Updated: ${p.updated}
+            </div>
 
             <div class="status ${p.color}">
                 Status: ${p.status}
             </div>
 
-            <div class="header-row">
-                <div>Epics</div>
-                <div>Features</div>
-                <div>Bugs</div>
-                <div>Tasks</div>
-            </div>
+            <div class="grid">
 
-            ${renderRow(p.flow, "new")}
-            ${renderRow(p.flow, "progress")}
-            ${renderRow(p.flow, "done")}
-            ${renderRow(p.flow, "blocked")}
+                <div class="block">
+                    <h4>ADO Work Breakdown</h4>
+                    <div>Epics: ${p.ado.epics}</div>
+                    <div>Features: ${p.ado.features}</div>
+                    <div>Bugs: ${p.ado.bugs}</div>
+                    <div>Tasks: ${p.ado.tasks}</div>
+                </div>
 
-            <div class="section" onclick="toggle(this)">
-                📌 Notes (Chronological)
-            </div>
-            <div class="content">
-                ${p.notes.map(n=>`
-                    <div class="note">
-                        <strong>${n.date}</strong><br/>
-                        ${n.text}
+                <div class="block">
+                    <h4>Triage</h4>
+                    <div class="metrics">
+                        <div class="metric">Priority: ${p.triage.priority}</div>
+                        <div class="metric">Urgency: ${p.triage.urgency}</div>
+                        <div class="metric">Effort: ${p.triage.effort}</div>
+                        <div class="metric">Risk: ${p.triage.risk}</div>
                     </div>
-                `).join("")}
-            </div>
+                </div>
 
-            <div class="section" onclick="toggle(this)">
-                📈 Timeline
-            </div>
-            <div class="content timeline">
-                ${p.timeline.map(t=>`
-                    <div class="event">• ${t}</div>
-                `).join("")}
+                <div class="block">
+                    <h4>Assigned Roles</h4>
+                    <div>Dev: ${p.roles.dev}</div>
+                    <div>DBA: ${p.roles.dba}</div>
+                    <div>BA: ${p.roles.ba}</div>
+                    <div>Tester: ${p.roles.tester}</div>
+                </div>
+
+                <div class="block">
+                    <h4>Attention Needed</h4>
+                    ${p.attention.map(a=>`<div class="tag">${a}</div>`).join("")}
+                </div>
+
             </div>
         `;
 
         app.appendChild(div);
     });
-}
-
-function renderRow(flow, key){
-    return `
-    <div class="flow-row">
-        <div class="cell ${key}">${flow.Epics[key] ?? 0}</div>
-        <div class="cell ${key}">${flow.Features[key] ?? 0}</div>
-        <div class="cell ${key}">${flow.Bugs[key] ?? 0}</div>
-        <div class="cell ${key}">${flow.Tasks[key] ?? 0}</div>
-    </div>`;
-}
-
-function toggle(el){
-    const content = el.nextElementSibling;
-    content.style.display = content.style.display === "block" ? "none" : "block";
 }
 
 render();
