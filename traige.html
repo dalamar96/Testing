@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Triage Workbench</title>
+<title>Triage Workbench - Notes Enabled</title>
 
 <style>
 body {
@@ -13,27 +13,19 @@ body {
     color: #e2e8f0;
 }
 
-/* HEADER */
 .header {
     padding: 14px 20px;
     background: #020617;
     border-bottom: 1px solid #1e293b;
 }
 
-.header h1 {
-    margin: 0;
-    font-size: 18px;
-}
-
-/* GRID */
 .container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 16px;
     padding: 16px;
 }
 
-/* CARD */
 .card {
     background: #020617;
     border: 1px solid #1e293b;
@@ -42,27 +34,25 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    transition: 0.2s;
 }
 
-.card:hover {
-    border-color: #3b82f6;
-}
-
-/* TITLE */
 .title {
     font-weight: 600;
     font-size: 15px;
 }
 
-/* META */
 .meta {
     font-size: 12px;
     color: #94a3b8;
 }
 
-/* INPUTS */
-select, input {
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+input, select, textarea {
     width: 100%;
     padding: 6px;
     background: #020617;
@@ -72,14 +62,29 @@ select, input {
     font-size: 12px;
 }
 
-/* ROW */
-.row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+textarea {
+    min-height: 60px;
+    resize: vertical;
 }
 
-/* BUTTONS */
+/* QUICK NOTES */
+.quick-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.quick-notes button {
+    background: #1e293b;
+    border: none;
+    color: #cbd5f5;
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* ACTIONS */
 .actions {
     display: flex;
     gap: 6px;
@@ -108,8 +113,13 @@ button {
 .status.Approved { color: #4ade80; }
 .status.Deferred { color: #facc15; }
 .status.Rejected { color: #f87171; }
-.status["Needs Clarification"] { color: #60a5fa; }
+.status.NeedsClarification { color: #60a5fa; }
 
+/* NOTE INDICATOR */
+.note-indicator {
+    font-size: 11px;
+    color: #38bdf8;
+}
 </style>
 </head>
 
@@ -123,9 +133,9 @@ button {
 
 <script>
 const data = [
-    {id:1, title:"Fix payment bug", desc:"Users cannot complete payment.", app:"Checkout", type:"Bug", urgency:6, impact:9, effort:3, status:"Pending"},
-    {id:2, title:"New dashboard", desc:"Need reporting tools.", app:"Portal", type:"Feature", urgency:5, impact:8, effort:5, status:"Pending"},
-    {id:3, title:"Refactor auth", desc:"Improve login system.", app:"Core", type:"Initiative", urgency:4, impact:7, effort:8, status:"Pending"}
+    {id:1, title:"Fix payment bug", desc:"Users cannot complete payment.", app:"Checkout", type:"Bug", urgency:6, impact:9, effort:3, status:"Pending", notes:""},
+    {id:2, title:"New dashboard", desc:"Need reporting tools.", app:"Portal", type:"Feature", urgency:5, impact:8, effort:5, status:"Pending", notes:""},
+    {id:3, title:"Refactor auth", desc:"Improve login system.", app:"Core", type:"Initiative", urgency:4, impact:7, effort:8, status:"Pending", notes:""}
 ];
 
 function render(){
@@ -139,6 +149,8 @@ function render(){
         div.innerHTML = `
             <div class="title">${item.title}</div>
             <div class="meta">${item.desc}</div>
+
+            ${item.notes ? `<div class="note-indicator">📝 Notes added</div>` : ""}
 
             <div class="row">
                 <div>
@@ -180,11 +192,23 @@ function render(){
                 <input type="number" value="${item.effort}" onchange="update(${item.id}, 'effort', this.value)" />
             </div>
 
+            <div>
+                <label>Notes</label>
+                <textarea onchange="update(${item.id}, 'notes', this.value)">${item.notes}</textarea>
+            </div>
+
+            <div class="quick-notes">
+                <button onclick="quickNote(${item.id}, 'Needs more detail')">Needs Detail</button>
+                <button onclick="quickNote(${item.id}, 'Duplicate request')">Duplicate</button>
+                <button onclick="quickNote(${item.id}, 'High business impact')">High Impact</button>
+                <button onclick="quickNote(${item.id}, 'Large effort, split later')">Split Later</button>
+            </div>
+
             <div class="actions">
                 <button class="approve" onclick="decide(${item.id}, 'Approved')">Approve</button>
                 <button class="defer" onclick="decide(${item.id}, 'Deferred')">Defer</button>
                 <button class="reject" onclick="decide(${item.id}, 'Rejected')">Reject</button>
-                <button class="clarify" onclick="decide(${item.id}, 'Needs Clarification')">Clarify</button>
+                <button class="clarify" onclick="decide(${item.id}, 'NeedsClarification')">Clarify</button>
             </div>
 
             <div class="status ${item.status}">
@@ -199,6 +223,12 @@ function render(){
 function update(id, field, value){
     const item = data.find(i=>i.id===id);
     item[field] = value;
+}
+
+function quickNote(id, text){
+    const item = data.find(i=>i.id===id);
+    item.notes = item.notes ? item.notes + " | " + text : text;
+    render();
 }
 
 function decide(id, decision){
