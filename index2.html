@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Priority Engine POC</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0f172a;
+        color: #e5e7eb;
+    }
+
+    .header {
+        padding: 12px 16px;
+        background: #020617;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #1e293b;
+    }
+
+    .header h1 {
+        font-size: 16px;
+        margin: 0;
+    }
+
+    .controls button {
+        margin-left: 8px;
+        background: #1e293b;
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        cursor: pointer;
+    }
+
+    .controls button.active {
+        background: #2563eb;
+    }
+
+    .list {
+        padding: 10px;
+    }
+
+    .card {
+        background: #020617;
+        border: 1px solid #1e293b;
+        margin-bottom: 8px;
+        padding: 10px;
+        cursor: grab;
+        transition: all 0.2s ease;
+    }
+
+    .card.dragging {
+        opacity: 0.5;
+    }
+
+    .card:hover {
+        border-color: #2563eb;
+    }
+
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .rank {
+        font-weight: bold;
+        margin-right: 8px;
+    }
+
+    .title {
+        font-weight: bold;
+    }
+
+    .meta {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .badges span {
+        background: #1e293b;
+        padding: 2px 6px;
+        margin-right: 4px;
+        font-size: 11px;
+    }
+
+    .bottom {
+        margin-top: 6px;
+        font-size: 12px;
+    }
+
+    .progress {
+        height: 4px;
+        background: #1e293b;
+        margin-top: 4px;
+        position: relative;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: #22c55e;
+    }
+
+    .why {
+        font-size: 11px;
+        color: #38bdf8;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .expanded {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #cbd5f5;
+        display: none;
+    }
+
+    .skipped {
+        color: #f87171;
+        font-size: 11px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Global Priority Stack</h1>
+    <div class="controls">
+        <button id="toggleWhy">Why?</button>
+    </div>
+</div>
+
+<div id="list" class="list"></div>
+
+<script>
+let showWhy = false;
+
+const data = [
+    {id:1, title:"Fix payment processing bug", type:"Bug", app:"Checkout", impact:9, urgency:9, effort:3, age:5, progress:40, skipped:0},
+    {id:2, title:"Add user dashboard analytics", type:"Feature", app:"Portal", impact:8, urgency:6, effort:5, age:10, progress:10, skipped:0},
+    {id:3, title:"Refactor auth system", type:"Initiative", app:"Core", impact:7, urgency:5, effort:8, age:20, progress:0, skipped:1},
+    {id:4, title:"Fix mobile layout issue", type:"Bug", app:"Frontend", impact:6, urgency:8, effort:2, age:3, progress:60, skipped:0},
+];
+
+function score(item){
+    return item.impact * 2 + item.urgency * 2 + item.age - item.effort;
+}
+
+function render(){
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    data.sort((a,b)=> score(b) - score(a));
+
+    data.forEach((item, index)=>{
+        const div = document.createElement("div");
+        div.className = "card";
+        div.draggable = true;
+        div.dataset.id = item.id;
+
+        div.innerHTML = `
+            <div class="top">
+                <div>
+                    <span class="rank">#${index+1}</span>
+                    <span class="title">${item.title}</span>
+                </div>
+                <div class="badges">
+                    <span>${item.type}</span>
+                    <span>${item.app}</span>
+                </div>
+            </div>
+
+            <div class="meta">
+                Impact ${item.impact} | Urgency ${item.urgency} | Effort ${item.effort} | Age ${item.age}
+                ${item.skipped > 0 ? `<span class="skipped"> | Skipped ${item.skipped}</span>` : ""}
+            </div>
+
+            <div class="bottom">
+                Progress: ${item.progress}%
+                <div class="progress">
+                    <div class="progress-bar" style="width:${item.progress}%"></div>
+                </div>
+            </div>
+
+            <div class="why">
+                Score = (${item.impact}×2 + ${item.urgency}×2 + ${item.age}) - ${item.effort} = ${score(item)}
+            </div>
+
+            <div class="expanded">
+                This is where expanded details would go (DevOps links, assignments, history).
+            </div>
+        `;
+
+        div.addEventListener("click", ()=>{
+            const expanded = div.querySelector(".expanded");
+            expanded.style.display = expanded.style.display === "block" ? "none" : "block";
+        });
+
+        if(showWhy){
+            div.querySelector(".why").style.display = "block";
+        }
+
+        addDragHandlers(div);
+        list.appendChild(div);
+    });
+}
+
+function addDragHandlers(card){
+    card.addEventListener("dragstart", ()=>{
+        card.classList.add("dragging");
+    });
+
+    card.addEventListener("dragend", ()=>{
+        card.classList.remove("dragging");
+        updateOrder();
+    });
+}
+
+document.getElementById("list").addEventListener("dragover", e=>{
+    e.preventDefault();
+    const dragging = document.querySelector(".dragging");
+    const after = getDragAfterElement(e.clientY);
+    const list = document.getElementById("list");
+
+    if(after == null){
+        list.appendChild(dragging);
+    } else {
+        list.insertBefore(dragging, after);
+    }
+});
+
+function getDragAfterElement(y){
+    const elements = [...document.querySelectorAll(".card:not(.dragging)")];
+
+    return elements.reduce((closest, child)=>{
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height/2;
+        if(offset < 0 && offset > closest.offset){
+            return {offset: offset, element: child};
+        } else {
+            return closest;
+        }
+    }, {offset: Number.NEGATIVE_INFINITY}).element;
+}
+
+function updateOrder(){
+    const cards = [...document.querySelectorAll(".card")];
+    cards.forEach((card, index)=>{
+        const item = data.find(i => i.id == card.dataset.id);
+        if(index !== data.indexOf(item)){
+            item.skipped++;
+        }
+    });
+    render();
+}
+
+document.getElementById("toggleWhy").onclick = ()=>{
+    showWhy = !showWhy;
+    document.getElementById("toggleWhy").classList.toggle("active");
+    render();
+};
+
+render();
+</script>
+
+</body>
+</html>
