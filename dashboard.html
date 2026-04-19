@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Work Dashboard POC</title>
+<title>Live Work Dashboard (ADO-style POC)</title>
 
 <style>
 body {
     margin: 0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-family: system-ui, sans-serif;
     background: #0b1220;
     color: #e2e8f0;
 }
 
 /* HEADER */
 .header {
-    padding: 14px 20px;
+    padding: 14px 18px;
     background: #020617;
     border-bottom: 1px solid #1e293b;
     display: flex;
@@ -24,23 +24,29 @@ body {
 }
 
 .header h1 {
+    font-size: 16px;
     margin: 0;
-    font-size: 18px;
 }
 
-.badge {
-    background: #1e293b;
-    padding: 4px 8px;
+.filters {
+    display: flex;
+    gap: 8px;
+}
+
+select {
+    background: #020617;
+    color: #e2e8f0;
+    border: 1px solid #1e293b;
+    padding: 6px;
     border-radius: 6px;
-    font-size: 12px;
 }
 
-/* GRID */
+/* LAYOUT */
 .container {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 16px;
-    padding: 16px;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 14px;
+    padding: 14px;
     max-width: 1300px;
     margin: auto;
 }
@@ -50,14 +56,7 @@ body {
     background: #020617;
     border: 1px solid #1e293b;
     border-radius: 10px;
-    padding: 14px;
-}
-
-/* SECTION TITLE */
-.title {
-    font-size: 14px;
-    color: #94a3b8;
-    margin-bottom: 10px;
+    padding: 12px;
 }
 
 /* CARD */
@@ -66,19 +65,25 @@ body {
     border-radius: 8px;
     padding: 10px;
     margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.15s;
 }
 
-.card h3 {
-    margin: 0;
-    font-size: 14px;
+.card:hover {
+    border-color: #3b82f6;
+}
+
+.title {
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .meta {
-    font-size: 12px;
+    font-size: 11px;
     color: #94a3b8;
 }
 
-/* STATUS COLORS */
+/* STATUS */
 .status {
     font-size: 11px;
     font-weight: bold;
@@ -103,23 +108,51 @@ body {
     background: #22c55e;
 }
 
-/* PIPELINE */
-.pipeline {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+/* DETAIL PANEL */
+.detail {
+    position: sticky;
+    top: 10px;
 }
 
-.small {
-    font-size: 11px;
+.section {
+    margin-bottom: 12px;
+}
+
+.section h3 {
+    font-size: 12px;
+    margin-bottom: 6px;
     color: #94a3b8;
 }
 
-/* GRID ROW */
+.tag {
+    display: inline-block;
+    background: #1e293b;
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    margin-right: 4px;
+}
+
+/* BUTTONS */
+button {
+    background: #1e293b;
+    color: white;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+button.primary {
+    background: #2563eb;
+}
+
+/* GRID */
 .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
 }
 </style>
 </head>
@@ -127,81 +160,217 @@ body {
 <body>
 
 <div class="header">
-    <h1>Work Dashboard</h1>
-    <div class="badge">Live System View</div>
+    <h1>Live Work Dashboard (ADO Feed)</h1>
+
+    <div class="filters">
+        <select id="statusFilter" onchange="render()">
+            <option value="ALL">All Status</option>
+            <option value="In Progress">In Progress</option>
+            <option value="QA">QA</option>
+            <option value="Blocked">Blocked</option>
+        </select>
+
+        <select id="teamFilter" onchange="render()">
+            <option value="ALL">All Teams</option>
+            <option value="Core">Core</option>
+            <option value="Portal">Portal</option>
+            <option value="Checkout">Checkout</option>
+        </select>
+    </div>
 </div>
 
 <div class="container">
 
-    <!-- ACTIVE WORK -->
+    <!-- LEFT: WORK STREAM -->
     <div class="panel">
-        <div class="title">🔥 Active Work (In Progress)</div>
-
-        <div class="card">
-            <h3>Payment Processing Fix</h3>
-            <div class="meta">Checkout • Bug</div>
-            <div class="status dev">In Development</div>
-            <div class="progress"><div class="bar" style="width:60%"></div></div>
-            <div class="small">Dev: Chad • QA: Sarah</div>
-        </div>
-
-        <div class="card">
-            <h3>Analytics Dashboard</h3>
-            <div class="meta">Portal • Feature</div>
-            <div class="status qa">In QA</div>
-            <div class="progress"><div class="bar" style="width:80%"></div></div>
-            <div class="small">Dev: Alex • QA: Nina</div>
-        </div>
-
-        <div class="card">
-            <h3>Auth System Refactor</h3>
-            <div class="meta">Core • Initiative</div>
-            <div class="status blocked">Blocked</div>
-            <div class="progress"><div class="bar" style="width:30%"></div></div>
-            <div class="small">Waiting on DB schema approval</div>
-        </div>
+        <div id="list"></div>
     </div>
 
-    <!-- PIPELINE -->
-    <div class="panel">
-        <div class="title">📦 Upcoming Work (Pipeline)</div>
-
-        <div class="pipeline">
-
-            <div class="card">
-                <h3>Mobile Layout Fixes</h3>
-                <div class="meta">Frontend • Bug</div>
-                <div class="small">Est: 1 sprint • High urgency</div>
-            </div>
-
-            <div class="card">
-                <h3>User Role Permissions</h3>
-                <div class="meta">Core • Feature</div>
-                <div class="small">Est: 2–3 sprints</div>
-            </div>
-
-            <div class="card">
-                <h3>Reporting API Expansion</h3>
-                <div class="meta">Backend • Enhancement</div>
-                <div class="small">Est: 2 sprints</div>
-            </div>
-
-        </div>
-
-        <div class="title" style="margin-top:16px;">⚠️ Risk / Attention</div>
-
-        <div class="card">
-            <h3>QA Bottleneck Emerging</h3>
-            <div class="small">4 items waiting for validation</div>
-        </div>
-
-        <div class="card">
-            <h3>High Effort Items Clustered</h3>
-            <div class="small">Upcoming load may exceed capacity</div>
-        </div>
+    <!-- RIGHT: DETAIL VIEW -->
+    <div class="panel detail" id="detail">
+        <div style="color:#94a3b8;">Select an item to inspect</div>
     </div>
 
 </div>
+
+<script>
+
+/*
+  ADO-style data model (simplified)
+  In real life this maps to:
+  - Work Item ID
+  - Title
+  - State
+  - AssignedTo
+  - IterationPath
+  - RemainingWork
+  - Tags
+*/
+
+const workItems = [
+{
+    id: 1001,
+    title: "Payment API failure on retry",
+    team: "Checkout",
+    type: "Bug",
+    state: "In Progress",
+    assignedTo: "Chad",
+    progress: 65,
+    remainingWork: 2,
+    tags: ["revenue", "urgent"],
+    linked: ["ADO-7782", "ADO-7790"],
+    notes: "Intermittent timeout in retry layer",
+    history: [
+        "Created from production incident",
+        "Assigned to dev",
+        "Root cause identified"
+    ]
+},
+{
+    id: 1002,
+    title: "Analytics dashboard aggregation",
+    team: "Portal",
+    type: "Feature",
+    state: "QA",
+    assignedTo: "Alex",
+    progress: 80,
+    remainingWork: 1,
+    tags: ["reporting"],
+    linked: ["ADO-8012"],
+    notes: "Waiting QA signoff on filtering logic",
+    history: [
+        "Dev complete",
+        "Deployed to QA",
+        "QA feedback in progress"
+    ]
+},
+{
+    id: 1003,
+    title: "Auth system refactor",
+    team: "Core",
+    type: "Initiative",
+    state: "Blocked",
+    assignedTo: "Team",
+    progress: 30,
+    remainingWork: 5,
+    tags: ["security"],
+    linked: ["ADO-8120", "ADO-8121"],
+    notes: "Waiting on DB schema approval",
+    history: [
+        "Design approved",
+        "Blocked by DB dependency"
+    ]
+}
+];
+
+let selected = null;
+
+/* FILTERING */
+function getFiltered(){
+    const status = document.getElementById("statusFilter").value;
+    const team = document.getElementById("teamFilter").value;
+
+    return workItems.filter(w=>{
+        return (status === "ALL" || w.state === status) &&
+               (team === "ALL" || w.team === team);
+    });
+}
+
+/* LIST */
+function render(){
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    const items = getFiltered();
+
+    items.forEach(item=>{
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <div class="title">${item.title}</div>
+            <div class="meta">${item.team} • ${item.type} • Assigned: ${item.assignedTo}</div>
+            <div class="status ${item.state.toLowerCase().replace(" ","")}">${item.state}</div>
+
+            <div class="progress">
+                <div class="bar" style="width:${item.progress}%"></div>
+            </div>
+        `;
+
+        div.onclick = ()=> showDetail(item);
+
+        list.appendChild(div);
+    });
+}
+
+/* DETAIL PANEL */
+function showDetail(item){
+    selected = item;
+
+    const detail = document.getElementById("detail");
+
+    detail.innerHTML = `
+        <h3>${item.title}</h3>
+        <div class="meta">Work Item #${item.id}</div>
+
+        <div class="section">
+            <h3>State</h3>
+            <span class="tag">${item.state}</span>
+            <span class="tag">${item.team}</span>
+            <span class="tag">${item.type}</span>
+        </div>
+
+        <div class="section">
+            <h3>Assignment</h3>
+            <div>${item.assignedTo}</div>
+        </div>
+
+        <div class="section">
+            <h3>Progress</h3>
+            <div>${item.progress}% complete</div>
+            <div class="progress">
+                <div class="bar" style="width:${item.progress}%"></div>
+            </div>
+            <div>Remaining Work: ${item.remainingWork} SP</div>
+        </div>
+
+        <div class="section">
+            <h3>Notes</h3>
+            <textarea style="width:100%;min-height:70px;background:#0b1220;color:white;border:1px solid #1e293b;border-radius:6px;padding:6px;">
+${item.notes}
+            </textarea>
+        </div>
+
+        <div class="section">
+            <h3>Linked ADO Work Items</h3>
+            ${item.linked.map(l=>`<div class="tag">${l}</div>`).join("")}
+        </div>
+
+        <div class="section">
+            <h3>History</h3>
+            ${item.history.map(h=>`<div>• ${h}</div>`).join("")}
+        </div>
+
+        <div class="section">
+            <button class="primary" onclick="simulateUpdate()">Simulate Progress</button>
+        </div>
+    `;
+}
+
+/* SIMULATED LIVE UPDATE */
+function simulateUpdate(){
+    if(!selected) return;
+
+    selected.progress = Math.min(100, selected.progress + 10);
+    selected.remainingWork = Math.max(0, selected.remainingWork - 1);
+
+    render();
+    showDetail(selected);
+}
+
+render();
+
+</script>
 
 </body>
 </html>
