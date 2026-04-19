@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Overview Grid Dashboard</title>
+<title>Project Flow Dashboard</title>
 
 <style>
 body {
@@ -27,7 +27,7 @@ body {
     padding: 14px;
 }
 
-/* GRID LAYOUT (2 wide cards) */
+/* GRID */
 .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -41,8 +41,6 @@ body {
     border-radius: 10px;
     padding: 14px;
     min-height: 420px;
-    display: flex;
-    flex-direction: column;
 }
 
 .title {
@@ -55,46 +53,59 @@ body {
     color: #94a3b8;
 }
 
+/* STATUS */
 .status.green { color: #4ade80; }
 .status.yellow { color: #facc15; }
 .status.red { color: #f87171; }
 
-/* HORIZONTAL WORK FLOW */
-.flow {
+/* HORIZONTAL STRUCTURE */
+.header-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
     margin-top: 12px;
-}
-
-.flow-block {
-    margin-bottom: 10px;
-}
-
-.flow-title {
     font-size: 12px;
     color: #94a3b8;
-    margin-bottom: 4px;
 }
 
-/* NEW HORIZONTAL BAR */
-.bar {
-    display: flex;
-    height: 26px;
-    border-radius: 6px;
-    overflow: hidden;
+/* FLOW ROWS */
+.flow-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+}
+
+/* CELL */
+.cell {
     border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
 }
 
-.seg {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
+/* STATUS COLORS (MEANINGFUL NOW) */
+.new {
+    background: rgba(59,130,246,0.15);
+    color: #60a5fa;
 }
 
-.new { background: #3b82f6; width: 30%; }
-.progress { background: #facc15; width: 40%; color: black; }
-.done { background: #4ade80; width: 30%; }
+.progress {
+    background: rgba(250,204,21,0.12);
+    color: #facc15;
+}
 
-/* NOTES + TIMELINE */
+.done {
+    background: rgba(74,222,128,0.12);
+    color: #4ade80;
+}
+
+.blocked {
+    background: rgba(248,113,113,0.12);
+    color: #f87171;
+}
+
+/* SECTION */
 .section {
     border-top: 1px solid #1e293b;
     padding: 8px 0;
@@ -130,8 +141,8 @@ body {
 <body>
 
 <div class="header">
-    <h1>Project Overview Grid (Flow-Based View)</h1>
-    <div class="meta">Epics / Features / Bugs / Tasks → Status Flow Visualization</div>
+    <h1>Project Flow Dashboard</h1>
+    <div class="meta">Horizontal Work System View (ADO-style flow map)</div>
 </div>
 
 <div class="container">
@@ -149,10 +160,10 @@ const projects = [
     updated: "2026-04-18",
 
     flow: {
-        Epics: { new: 2, progress: 3, done: 5 },
-        Features: { new: 4, progress: 3, done: 5 },
-        Bugs: { new: 3, progress: 6, done: 3 },
-        Tasks: { new: 5, progress: 6, done: 3 }
+        Epics:    { new: 2, progress: 3, done: 5, blocked: 1 },
+        Features: { new: 4, progress: 3, done: 5, blocked: 0 },
+        Bugs:     { new: 3, progress: 6, done: 3, blocked: 2 },
+        Tasks:    { new: 5, progress: 6, done: 3, blocked: 0 }
     },
 
     notes: [
@@ -177,10 +188,10 @@ const projects = [
     updated: "2026-04-17",
 
     flow: {
-        Epics: { new: 1, progress: 4, done: 2 },
-        Features: { new: 6, progress: 5, done: 5 },
-        Bugs: { new: 2, progress: 3, done: 2 },
-        Tasks: { new: 3, progress: 4, done: 3 }
+        Epics:    { new: 1, progress: 4, done: 2, blocked: 0 },
+        Features: { new: 6, progress: 5, done: 5, blocked: 1 },
+        Bugs:     { new: 2, progress: 3, done: 2, blocked: 1 },
+        Tasks:    { new: 3, progress: 4, done: 3, blocked: 0 }
     },
 
     notes: [
@@ -194,34 +205,6 @@ const projects = [
         "2026-04-08 - QA slowdown",
         "2026-04-12 - Refactor begins",
         "2026-04-17 - Risk flagged"
-    ]
-},
-
-{
-    name: "Core Authentication System",
-    status: "Blocked",
-    color: "red",
-    created: "2025-10-10",
-    updated: "2026-04-16",
-
-    flow: {
-        Epics: { new: 0, progress: 2, done: 3 },
-        Features: { new: 1, progress: 1, done: 2 },
-        Bugs: { new: 2, progress: 5, done: 2 },
-        Tasks: { new: 3, progress: 4, done: 4 }
-    },
-
-    notes: [
-        {date:"2026-04-03", text:"DB schema blocking progress"},
-        {date:"2026-04-09", text:"Security audit expanded"},
-        {date:"2026-04-16", text:"Still blocked on infra approval"}
-    ],
-
-    timeline: [
-        "2026-03-28 - Epic started",
-        "2026-04-03 - DB blocker",
-        "2026-04-09 - Security expansion",
-        "2026-04-16 - Blocked state"
     ]
 }
 ];
@@ -242,27 +225,17 @@ function render(){
                 Status: ${p.status}
             </div>
 
-            <div class="flow">
-
-                ${Object.entries(p.flow).map(([type,data])=>`
-                    <div class="flow-block">
-                        <div class="flow-title">${type}</div>
-
-                        <div class="bar">
-                            <div class="seg new">
-                                ${data.new}
-                            </div>
-                            <div class="seg progress">
-                                ${data.progress}
-                            </div>
-                            <div class="seg done">
-                                ${data.done}
-                            </div>
-                        </div>
-                    </div>
-                `).join("")}
-
+            <div class="header-row">
+                <div>Epics</div>
+                <div>Features</div>
+                <div>Bugs</div>
+                <div>Tasks</div>
             </div>
+
+            ${renderRow(p.flow, "new")}
+            ${renderRow(p.flow, "progress")}
+            ${renderRow(p.flow, "done")}
+            ${renderRow(p.flow, "blocked")}
 
             <div class="section" onclick="toggle(this)">
                 📌 Notes (Chronological)
@@ -288,6 +261,16 @@ function render(){
 
         app.appendChild(div);
     });
+}
+
+function renderRow(flow, key){
+    return `
+    <div class="flow-row">
+        <div class="cell ${key}">${flow.Epics[key] ?? 0}</div>
+        <div class="cell ${key}">${flow.Features[key] ?? 0}</div>
+        <div class="cell ${key}">${flow.Bugs[key] ?? 0}</div>
+        <div class="cell ${key}">${flow.Tasks[key] ?? 0}</div>
+    </div>`;
 }
 
 function toggle(el){
