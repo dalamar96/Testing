@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Project Command Dashboard</title>
+<title>Project Flight Deck Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -17,10 +17,9 @@ body {
     padding: 14px 18px;
     background: #020617;
     border-bottom: 1px solid #1e293b;
-    display: flex;
-    justify-content: space-between;
 }
 
+/* GRID */
 .container {
     max-width: 1100px;
     margin: auto;
@@ -36,7 +35,14 @@ body {
     margin-bottom: 14px;
 }
 
-/* HEADER */
+/* TOP HEADER */
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
 .title {
     font-size: 16px;
     font-weight: 700;
@@ -47,45 +53,26 @@ body {
     color: #94a3b8;
 }
 
-/* STATUS */
-.status {
-    font-size: 12px;
-    font-weight: 600;
-}
-.green { color: #4ade80; }
-.yellow { color: #facc15; }
-.red { color: #f87171; }
-
-/* HEADER GRID */
-.top {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 10px;
-    margin-top: 10px;
+/* TRIAGE INLINE */
+.triage {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
 }
 
-.panel {
-    background: #0b1220;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    padding: 10px;
-}
-
-.panel h4 {
-    margin: 0 0 6px 0;
-    font-size: 12px;
-    color: #94a3b8;
-}
-
-/* TRIAGE TAGS */
 .tag {
-    display: inline-block;
+    font-size: 11px;
     padding: 3px 6px;
     border-radius: 6px;
-    font-size: 11px;
     background: #1e293b;
-    margin: 2px;
+    color: #cbd5e1;
 }
+
+/* STATUS */
+.status.green { color: #4ade80; }
+.status.yellow { color: #facc15; }
+.status.red { color: #f87171; }
 
 /* WORK GRID */
 .work-grid {
@@ -108,26 +95,31 @@ body {
     color: #94a3b8;
 }
 
-/* STATUS ROWS */
+/* PROGRESS BAR */
+.bar {
+    width: 100%;
+    height: 8px;
+    background: #1e293b;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.fill {
+    height: 100%;
+    background: #4ade80;
+}
+
+/* COLORS BY TYPE */
+.epic { background: #60a5fa; }
+.feature { background: #a78bfa; }
+.bug { background: #f87171; }
+.task { background: #facc15; }
+
+/* LABEL ROW */
 .row {
     display: flex;
     justify-content: space-between;
-    font-size: 11px;
-    margin: 2px 0;
-}
-
-/* ASSIGNEES */
-.people {
-    font-size: 11px;
-    color: #cbd5e1;
-}
-
-.person {
-    display: inline-block;
-    margin: 2px;
-    padding: 2px 6px;
-    border-radius: 6px;
-    background: #1e293b;
     font-size: 11px;
 }
 </style>
@@ -136,8 +128,7 @@ body {
 <body>
 
 <div class="header">
-    <h1>Project Command Dashboard</h1>
-    <div class="meta">ADO + Triage + Ownership View</div>
+    <h1>Project Flight Deck</h1>
 </div>
 
 <div class="container" id="app"></div>
@@ -160,17 +151,10 @@ const projects = [
     },
 
     ado: {
-        Epics: { new: 2, progress: 3, done: 5 },
-        Features: { new: 4, progress: 3, done: 5 },
-        Bugs: { new: 3, progress: 6, done: 3 },
-        Tasks: { new: 5, progress: 6, done: 3 }
-    },
-
-    owners: {
-        dev: ["Alex", "Morgan"],
-        dba: ["Sam"],
-        ba: ["Jordan", "Casey"],
-        tester: ["Riley"]
+        Epics: { done: 5, total: 7 },
+        Features: { done: 5, total: 12 },
+        Bugs: { done: 3, total: 12 },
+        Tasks: { done: 3, total: 14 }
     }
 },
 
@@ -189,17 +173,10 @@ const projects = [
     },
 
     ado: {
-        Epics: { new: 1, progress: 4, done: 2 },
-        Features: { new: 6, progress: 5, done: 5 },
-        Bugs: { new: 2, progress: 3, done: 2 },
-        Tasks: { new: 3, progress: 4, done: 3 }
-    },
-
-    owners: {
-        dev: ["Taylor", "Jamie"],
-        dba: ["Sam"],
-        ba: ["Morgan"],
-        tester: ["Riley", "Casey"]
+        Epics: { done: 2, total: 5 },
+        Features: { done: 5, total: 16 },
+        Bugs: { done: 2, total: 7 },
+        Tasks: { done: 3, total: 10 }
     }
 }
 ];
@@ -213,55 +190,33 @@ function render(){
         div.className = "card";
 
         div.innerHTML = `
-            <div class="title">${p.name}</div>
-            <div class="meta">
-                Created: ${p.created} | Updated: ${p.updated}
-            </div>
-
-            <div class="status ${p.color}">
-                Status: ${p.status}
-            </div>
-
-            <!-- TRIAGE MOVED INTO HEADER -->
             <div class="top">
 
-                <div class="panel">
-                    <h4>Triage</h4>
-                    <div class="tag">Priority: ${p.triage.priority}</div>
-                    <div class="tag">Urgency: ${p.triage.urgency}</div>
-                    <div class="tag">Effort: ${p.triage.effort}</div>
-                    <div class="tag">Risk: ${p.triage.risk}</div>
+                <div>
+                    <div class="title">${p.name}</div>
+                    <div class="meta">
+                        Created: ${p.created} | Updated: ${p.updated}
+                    </div>
+                    <div class="status ${p.color}">
+                        Status: ${p.status}
+                    </div>
                 </div>
 
-                <div class="panel">
-                    <h4>Assigned Roles</h4>
-
-                    <div><strong>Dev:</strong>
-                        ${p.owners.dev.map(x=>`<span class="person">${x}</span>`).join("")}
-                    </div>
-
-                    <div><strong>DBA:</strong>
-                        ${p.owners.dba.map(x=>`<span class="person">${x}</span>`).join("")}
-                    </div>
-
-                    <div><strong>BA:</strong>
-                        ${p.owners.ba.map(x=>`<span class="person">${x}</span>`).join("")}
-                    </div>
-
-                    <div><strong>Tester:</strong>
-                        ${p.owners.tester.map(x=>`<span class="person">${x}</span>`).join("")}
-                    </div>
+                <div class="triage">
+                    <span class="tag">Priority ${p.triage.priority}</span>
+                    <span class="tag">Urgency ${p.triage.urgency}</span>
+                    <span class="tag">Effort ${p.triage.effort}</span>
+                    <span class="tag">Risk ${p.triage.risk}</span>
                 </div>
 
             </div>
 
-            <!-- WORK ITEMS -->
             <div class="work-grid">
 
-                ${renderWork("Epics", p.ado.Epics)}
-                ${renderWork("Features", p.ado.Features)}
-                ${renderWork("Bugs", p.ado.Bugs)}
-                ${renderWork("Tasks", p.ado.Tasks)}
+                ${workBlock("Epics", p.ado.Epics, "epic")}
+                ${workBlock("Features", p.ado.Features, "feature")}
+                ${workBlock("Bugs", p.ado.Bugs, "bug")}
+                ${workBlock("Tasks", p.ado.Tasks, "task")}
 
             </div>
         `;
@@ -270,14 +225,21 @@ function render(){
     });
 }
 
-function renderWork(title, data){
+function workBlock(name, data, cls){
+    const percent = Math.round((data.done / data.total) * 100);
+
     return `
     <div class="work">
-        <h5>${title}</h5>
+        <h5>${name}</h5>
 
-        <div class="row"><span>New</span><span>${data.new}</span></div>
-        <div class="row"><span>In Progress</span><span>${data.progress}</span></div>
-        <div class="row"><span>Done</span><span>${data.done}</span></div>
+        <div class="row">
+            <span>${data.done} / ${data.total}</span>
+            <span>${percent}%</span>
+        </div>
+
+        <div class="bar">
+            <div class="fill ${cls}" style="width:${percent}%"></div>
+        </div>
     </div>
     `;
 }
