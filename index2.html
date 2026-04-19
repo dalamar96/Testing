@@ -1,91 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Priority Engine - Readable POC</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Priority Stack - Expanded Detail</title>
 
 <style>
 body {
     margin: 0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-family: system-ui, sans-serif;
     background: #0b1220;
     color: #e2e8f0;
 }
 
-/* HEADER */
 .header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    padding: 14px 20px;
     background: #020617;
     border-bottom: 1px solid #1e293b;
-    padding: 12px 20px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
 }
 
-.header h1 {
-    font-size: 18px;
-    margin: 0;
-}
-
-.controls button {
-    background: #1e293b;
-    border: none;
-    color: #e2e8f0;
-    padding: 6px 12px;
-    cursor: pointer;
-    border-radius: 6px;
-}
-
-.controls button.active {
-    background: #2563eb;
-}
-
-/* LIST */
 .list {
     max-width: 1100px;
     margin: auto;
     padding: 16px;
 }
 
-/* CARD */
 .card {
-    display: grid;
-    grid-template-columns: 70px 1fr 220px 140px;
-    gap: 16px;
-    align-items: center;
     background: #020617;
     border: 1px solid #1e293b;
     border-radius: 10px;
     padding: 14px;
     margin-bottom: 10px;
-    cursor: grab;
+    cursor: pointer;
     transition: 0.2s;
 }
 
 .card:hover {
     border-color: #3b82f6;
-    background: #020617;
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
 }
 
 .rank {
-    font-size: 18px;
     font-weight: bold;
     color: #60a5fa;
 }
 
-/* MAIN CONTENT */
-.main {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
 .title {
-    font-size: 15px;
     font-weight: 600;
 }
 
@@ -94,70 +60,52 @@ body {
     color: #94a3b8;
 }
 
+/* EXPANDED PANEL */
+.expanded {
+    margin-top: 12px;
+    border-top: 1px solid #1e293b;
+    padding-top: 12px;
+    display: none;
+}
+
+.section {
+    margin-bottom: 12px;
+}
+
+.section-title {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+
 /* TAGS */
-.tags span {
+.badge {
     background: #1e293b;
-    padding: 3px 8px;
-    margin-right: 6px;
+    padding: 3px 6px;
     border-radius: 6px;
     font-size: 11px;
+    margin-right: 4px;
 }
 
-/* SIGNALS */
-.signals {
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* LIST ITEMS */
+.list-item {
     font-size: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+    margin-bottom: 4px;
     color: #cbd5f5;
 }
 
-/* PROGRESS */
-.progress-wrap {
-    font-size: 12px;
-}
-
-.progress {
-    height: 6px;
-    background: #1e293b;
-    border-radius: 4px;
-    margin-top: 4px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    background: #22c55e;
-}
-
-/* WHY PANEL */
-.why {
-    grid-column: span 4;
-    font-size: 12px;
+/* LINK STYLE */
+.link {
     color: #38bdf8;
-    margin-top: 6px;
-    display: none;
-}
-
-/* EXPANDED */
-.expanded {
-    grid-column: span 4;
-    font-size: 12px;
-    color: #cbd5f5;
-    margin-top: 6px;
-    display: none;
-    border-top: 1px solid #1e293b;
-    padding-top: 6px;
-}
-
-/* SKIPPED */
-.skipped {
-    color: #f87171;
-}
-
-/* DRAGGING */
-.dragging {
-    opacity: 0.4;
+    cursor: pointer;
+    text-decoration: underline;
 }
 </style>
 </head>
@@ -165,144 +113,153 @@ body {
 <body>
 
 <div class="header">
-    <h1>Global Priority Stack</h1>
-    <div class="controls">
-        <button id="toggleWhy">Why?</button>
-    </div>
+    <h3>Global Priority Stack</h3>
 </div>
 
 <div id="list" class="list"></div>
 
 <script>
-let showWhy = false;
-
 const data = [
-    {id:1, title:"Fix payment processing bug", type:"Bug", app:"Checkout", impact:9, urgency:9, effort:3, age:5, progress:40, skipped:0},
-    {id:2, title:"Add user dashboard analytics", type:"Feature", app:"Portal", impact:8, urgency:6, effort:5, age:10, progress:10, skipped:0},
-    {id:3, title:"Refactor auth system", type:"Initiative", app:"Core", impact:7, urgency:5, effort:8, age:20, progress:0, skipped:1},
-    {id:4, title:"Fix mobile layout issue", type:"Bug", app:"Frontend", impact:6, urgency:8, effort:2, age:3, progress:60, skipped:0},
+{
+    id:1,
+    title:"Fix payment processing bug",
+    app:"Checkout",
+    type:"Bug",
+    impact:9,
+    urgency:9,
+    effort:3,
+    age:5,
+    notes:"Critical for revenue. Customers blocked.",
+    decisions:[
+        {date:"2026-04-10", text:"Approved in triage due to revenue impact"},
+        {date:"2026-04-12", text:"Priority raised after escalation"}
+    ],
+    roles:{
+        dev:"Chad",
+        qa:"Sarah",
+        ba:"Mike",
+        dba:"Lisa"
+    },
+    work:[
+        "DEV-1023 Payment Fix",
+        "DEV-1044 API Retry Logic"
+    ],
+    activity:[
+        "Tasks created in DevOps",
+        "Development started",
+        "Pending QA validation"
+    ]
+},
+{
+    id:2,
+    title:"Add analytics dashboard",
+    app:"Portal",
+    type:"Feature",
+    impact:8,
+    urgency:6,
+    effort:5,
+    age:10,
+    notes:"Requested by leadership for visibility.",
+    decisions:[
+        {date:"2026-04-08", text:"Approved for Q2 roadmap"}
+    ],
+    roles:{
+        dev:"Alex",
+        qa:"Nina",
+        ba:"Chris",
+        dba:"—"
+    },
+    work:[
+        "DEV-1101 Dashboard UI",
+        "DEV-1102 Metrics API"
+    ],
+    activity:[
+        "Design phase complete",
+        "Awaiting dev assignment"
+    ]
+}
 ];
 
-function score(item){
-    return item.impact * 2 + item.urgency * 2 + item.age - item.effort;
+function score(i){
+    return i.impact*2 + i.urgency*2 + i.age - i.effort;
 }
 
 function render(){
     const list = document.getElementById("list");
     list.innerHTML = "";
 
-    data.sort((a,b)=> score(b) - score(a));
+    data.sort((a,b)=> score(b)-score(a));
 
     data.forEach((item, index)=>{
         const div = document.createElement("div");
         div.className = "card";
-        div.draggable = true;
-        div.dataset.id = item.id;
 
         div.innerHTML = `
-            <div class="rank">#${index+1}</div>
-
-            <div class="main">
-                <div class="title">${item.title}</div>
+            <div class="top">
+                <div>
+                    <span class="rank">#${index+1}</span>
+                    <span class="title">${item.title}</span>
+                </div>
                 <div class="meta">${item.app} • ${item.type}</div>
-                <div class="tags">
-                    <span>Impact ${item.impact}</span>
-                    <span>Urgency ${item.urgency}</span>
-                    <span>Effort ${item.effort}</span>
-                    <span>Age ${item.age}</span>
-                    ${item.skipped > 0 ? `<span class="skipped">Skipped ${item.skipped}</span>` : ""}
-                </div>
             </div>
 
-            <div class="signals">
-                <div>Score: ${score(item)}</div>
-                <div>Status: Active</div>
-            </div>
-
-            <div class="progress-wrap">
-                ${item.progress}%
-                <div class="progress">
-                    <div class="progress-bar" style="width:${item.progress}%"></div>
-                </div>
-            </div>
-
-            <div class="why">
-                (${item.impact}×2 + ${item.urgency}×2 + ${item.age}) - ${item.effort}
+            <div class="meta">
+                Impact ${item.impact} | Urgency ${item.urgency} | Effort ${item.effort}
             </div>
 
             <div class="expanded">
-                Expanded details: DevOps links, assignments, decision history.
+                <div class="grid">
+
+                    <div>
+                        <div class="section">
+                            <div class="section-title">Notes</div>
+                            <div class="list-item">${item.notes}</div>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">Decision History</div>
+                            ${item.decisions.map(d=>`
+                                <div class="list-item">${d.date} - ${d.text}</div>
+                            `).join("")}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="section">
+                            <div class="section-title">Assignments</div>
+                            <div class="list-item">Dev: ${item.roles.dev}</div>
+                            <div class="list-item">QA: ${item.roles.qa}</div>
+                            <div class="list-item">BA: ${item.roles.ba}</div>
+                            <div class="list-item">DBA: ${item.roles.dba}</div>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">Linked Work</div>
+                            ${item.work.map(w=>`
+                                <div class="list-item link">${w}</div>
+                            `).join("")}
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">Activity</div>
+                            ${item.activity.map(a=>`
+                                <div class="list-item">${a}</div>
+                            `).join("")}
+                        </div>
+                    </div>
+
+                </div>
             </div>
         `;
 
-        div.addEventListener("click", ()=>{
-            const expanded = div.querySelector(".expanded");
-            expanded.style.display = expanded.style.display === "block" ? "none" : "block";
-        });
+        div.onclick = ()=>{
+            const exp = div.querySelector(".expanded");
+            exp.style.display = exp.style.display === "block" ? "none" : "block";
+        };
 
-        if(showWhy){
-            div.querySelector(".why").style.display = "block";
-        }
-
-        addDragHandlers(div);
         list.appendChild(div);
     });
 }
-
-function addDragHandlers(card){
-    card.addEventListener("dragstart", ()=>{
-        card.classList.add("dragging");
-    });
-
-    card.addEventListener("dragend", ()=>{
-        card.classList.remove("dragging");
-        updateOrder();
-    });
-}
-
-document.getElementById("list").addEventListener("dragover", e=>{
-    e.preventDefault();
-    const dragging = document.querySelector(".dragging");
-    const after = getDragAfterElement(e.clientY);
-    const list = document.getElementById("list");
-
-    if(after == null){
-        list.appendChild(dragging);
-    } else {
-        list.insertBefore(dragging, after);
-    }
-});
-
-function getDragAfterElement(y){
-    const elements = [...document.querySelectorAll(".card:not(.dragging)")];
-
-    return elements.reduce((closest, child)=>{
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height/2;
-        if(offset < 0 && offset > closest.offset){
-            return {offset: offset, element: child};
-        } else {
-            return closest;
-        }
-    }, {offset: Number.NEGATIVE_INFINITY}).element;
-}
-
-function updateOrder(){
-    const cards = [...document.querySelectorAll(".card")];
-    cards.forEach((card, index)=>{
-        const item = data.find(i => i.id == card.dataset.id);
-        if(index !== data.indexOf(item)){
-            item.skipped++;
-        }
-    });
-    render();
-}
-
-document.getElementById("toggleWhy").onclick = ()=>{
-    showWhy = !showWhy;
-    document.getElementById("toggleWhy").classList.toggle("active");
-    render();
-};
 
 render();
 </script>
