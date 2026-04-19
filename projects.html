@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Overview Dashboard (Hierarchy Model)</title>
+<title>Project Overview Grid Dashboard</title>
 
 <style>
 body {
@@ -22,17 +22,27 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1300px;
     margin: auto;
     padding: 14px;
 }
 
+/* GRID LAYOUT (2 wide cards) */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* CARD */
 .card {
     border: 1px solid #1e293b;
     background: #020617;
     border-radius: 10px;
     padding: 14px;
-    margin-bottom: 14px;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
 }
 
 .title {
@@ -49,40 +59,42 @@ body {
 .status.yellow { color: #facc15; }
 .status.red { color: #f87171; }
 
-/* HIERARCHY BLOCK */
-.hierarchy {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-top: 10px;
+/* HORIZONTAL WORK FLOW */
+.flow {
+    margin-top: 12px;
 }
 
-.block {
-    background: #1e293b;
-    border-radius: 8px;
-    padding: 8px;
-    font-size: 11px;
+.flow-block {
+    margin-bottom: 10px;
 }
 
-.block h4 {
-    margin: 0 0 6px 0;
-    font-size: 11px;
+.flow-title {
+    font-size: 12px;
     color: #94a3b8;
+    margin-bottom: 4px;
 }
 
-/* STATUS ROWS */
-.row {
+/* NEW HORIZONTAL BAR */
+.bar {
     display: flex;
-    justify-content: space-between;
+    height: 26px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #1e293b;
+}
+
+.seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 11px;
-    margin: 2px 0;
 }
 
-.label {
-    color: #cbd5f5;
-}
+.new { background: #3b82f6; width: 30%; }
+.progress { background: #facc15; width: 40%; color: black; }
+.done { background: #4ade80; width: 30%; }
 
-/* ACCORDION */
+/* NOTES + TIMELINE */
 .section {
     border-top: 1px solid #1e293b;
     padding: 8px 0;
@@ -118,99 +130,98 @@ body {
 <body>
 
 <div class="header">
-    <h1>Project Overview (ADO Hierarchy Model)</h1>
-    <div class="meta">Epics → Features → Bugs → Tasks (Status Breakdown View)</div>
+    <h1>Project Overview Grid (Flow-Based View)</h1>
+    <div class="meta">Epics / Features / Bugs / Tasks → Status Flow Visualization</div>
 </div>
 
-<div class="container" id="app"></div>
+<div class="container">
+    <div class="grid" id="app"></div>
+</div>
 
 <script>
 
 const projects = [
 {
-    id: 1,
     name: "Checkout Platform",
     status: "Healthy",
     color: "green",
     created: "2025-11-01",
     updated: "2026-04-18",
 
-    hierarchy: {
-        epics: { New: 2, "In Progress": 3, Done: 5 },
-        features: { New: 4, "In Progress": 3, Done: 5 },
-        bugs: { New: 3, "In Progress": 6, Done: 3 },
-        tasks: { New: 5, "In Progress": 6, Done: 3 }
+    flow: {
+        Epics: { new: 2, progress: 3, done: 5 },
+        Features: { new: 4, progress: 3, done: 5 },
+        Bugs: { new: 3, progress: 6, done: 3 },
+        Tasks: { new: 5, progress: 6, done: 3 }
     },
 
     notes: [
-        {date:"2026-04-10", text:"Revenue bug in retry flow caused spike"},
+        {date:"2026-04-10", text:"Revenue bug spike in retry flow"},
         {date:"2026-04-12", text:"Hotfix stabilized system"},
-        {date:"2026-04-18", text:"QA backlog slightly growing"}
+        {date:"2026-04-18", text:"QA backlog rising slightly"}
     ],
 
     timeline: [
-        "2026-04-01 - Epic: Payment stability started",
-        "2026-04-05 - Bug surge detected",
-        "2026-04-10 - Emergency release",
+        "2026-04-01 - Sprint started",
+        "2026-04-05 - Incident detected",
+        "2026-04-10 - Hotfix deployed",
         "2026-04-15 - QA bottleneck"
     ]
 },
 
 {
-    id: 2,
     name: "Analytics Portal",
     status: "At Risk",
     color: "yellow",
     created: "2025-12-15",
     updated: "2026-04-17",
 
-    hierarchy: {
-        epics: { New: 1, "In Progress": 4, Done: 2 },
-        features: { New: 6, "In Progress": 5, Done: 5 },
-        bugs: { New: 2, "In Progress": 3, Done: 2 },
-        tasks: { New: 3, "In Progress": 4, Done: 3 }
+    flow: {
+        Epics: { new: 1, progress: 4, done: 2 },
+        Features: { new: 6, progress: 5, done: 5 },
+        Bugs: { new: 2, progress: 3, done: 2 },
+        Tasks: { new: 3, progress: 4, done: 3 }
     },
 
     notes: [
-        {date:"2026-04-08", text:"Performance regression in QA"},
-        {date:"2026-04-12", text:"Aggregation delays increasing"},
-        {date:"2026-04-17", text:"Risk flagged due to QA saturation"}
+        {date:"2026-04-08", text:"QA slowdown began"},
+        {date:"2026-04-12", text:"API refactor increasing load"},
+        {date:"2026-04-17", text:"Risk escalated due to QA saturation"}
     ],
 
     timeline: [
-        "2026-04-01 - Analytics epic started",
+        "2026-04-01 - Epic started",
         "2026-04-08 - QA slowdown",
-        "2026-04-12 - API refactor began",
-        "2026-04-17 - Risk escalation"
+        "2026-04-12 - Refactor begins",
+        "2026-04-17 - Risk flagged"
     ]
 },
 
 {
-    id: 3,
     name: "Core Authentication System",
     status: "Blocked",
     color: "red",
     created: "2025-10-10",
     updated: "2026-04-16",
 
-    hierarchy: {
-        epics: { New: 0, "In Progress": 2, Done: 3 },
-        features: { New: 1, "In Progress": 1, Done: 2 },
-        bugs: { New: 2, "In Progress": 5, Done: 2 },
-        tasks: { New: 3, "In Progress": 4, Done: 4 }
+    flow: {
+        Epics: { new: 0, progress: 2, done: 3 },
+        Features: { new: 1, progress: 1, done: 2 },
+        Bugs: { new: 2, progress: 5, done: 2 },
+        Tasks: { new: 3, progress: 4, done: 4 }
     },
 
     notes: [
-        {date:"2026-04-03", text:"DB schema dependency blocking progress"},
-        {date:"2026-04-09", text:"Security audit expanded scope"},
+        {date:"2026-04-03", text:"DB schema blocking progress"},
+        {date:"2026-04-09", text:"Security audit expanded"},
         {date:"2026-04-16", text:"Still blocked on infra approval"}
     ],
 
     timeline: [
-        "2026-03-28 - Auth epic started",
-        "2026-04-03 - DB blocker introduced",
-        "2026-04-09 - Security review expanded",
-        "2026-04-16 - Blocked state persists"
+        "2026-03-28 - Epic started",
+        "2026-04-03 - DB blocker",
+        "2026-04-09 - Security expansion",
+        "2026-04-16 - Blocked state"
     ]
 }
 ];
@@ -223,39 +234,33 @@ function render(){
         const div = document.createElement("div");
         div.className = "card";
 
-        const h = p.hierarchy;
-
         div.innerHTML = `
             <div class="title">${p.name}</div>
-            <div class="meta">
-                Created: ${p.created} | Updated: ${p.updated}
-            </div>
+            <div class="meta">Created: ${p.created} | Updated: ${p.updated}</div>
 
             <div class="status ${p.color}">
                 Status: ${p.status}
             </div>
 
-            <div class="hierarchy">
+            <div class="flow">
 
-                <div class="block">
-                    <h4>Epics</h4>
-                    ${format(h.epics)}
-                </div>
+                ${Object.entries(p.flow).map(([type,data])=>`
+                    <div class="flow-block">
+                        <div class="flow-title">${type}</div>
 
-                <div class="block">
-                    <h4>Features</h4>
-                    ${format(h.features)}
-                </div>
-
-                <div class="block">
-                    <h4>Bugs</h4>
-                    ${format(h.bugs)}
-                </div>
-
-                <div class="block">
-                    <h4>Tasks</h4>
-                    ${format(h.tasks)}
-                </div>
+                        <div class="bar">
+                            <div class="seg new">
+                                ${data.new}
+                            </div>
+                            <div class="seg progress">
+                                ${data.progress}
+                            </div>
+                            <div class="seg done">
+                                ${data.done}
+                            </div>
+                        </div>
+                    </div>
+                `).join("")}
 
             </div>
 
@@ -272,7 +277,7 @@ function render(){
             </div>
 
             <div class="section" onclick="toggle(this)">
-                📈 Timeline (All Work Items)
+                📈 Timeline
             </div>
             <div class="content timeline">
                 ${p.timeline.map(t=>`
@@ -283,12 +288,6 @@ function render(){
 
         app.appendChild(div);
     });
-}
-
-function format(obj){
-    return Object.entries(obj).map(([k,v])=>{
-        return `<div class="row"><span class="label">${k}</span><span>${v}</span></div>`;
-    }).join("");
 }
 
 function toggle(el){
