@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Project Command Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Briefing Dashboard</title>
 
 <style>
 body {
@@ -50,34 +50,34 @@ body {
 /* STATUS */
 .status {
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 600;
 }
 .green { color: #4ade80; }
 .yellow { color: #facc15; }
 .red { color: #f87171; }
 
-/* GRID SECTIONS */
-.grid {
+/* HEADER GRID */
+.top {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.5fr 1fr;
     gap: 10px;
-    margin-top: 12px;
+    margin-top: 10px;
 }
 
-.block {
+.panel {
     background: #0b1220;
     border: 1px solid #1e293b;
     border-radius: 8px;
     padding: 10px;
 }
 
-.block h4 {
+.panel h4 {
     margin: 0 0 6px 0;
     font-size: 12px;
     color: #94a3b8;
 }
 
-/* TAGS */
+/* TRIAGE TAGS */
 .tag {
     display: inline-block;
     padding: 3px 6px;
@@ -87,33 +87,57 @@ body {
     margin: 2px;
 }
 
-/* TRIAGE METRICS */
-.metrics {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 6px;
+/* WORK GRID */
+.work-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 12px;
 }
 
-.metric {
+.work {
+    background: #0b1220;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.work h5 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* STATUS ROWS */
+.row {
+    display: flex;
+    justify-content: space-between;
     font-size: 11px;
-    padding: 4px 6px;
+    margin: 2px 0;
+}
+
+/* ASSIGNEES */
+.people {
+    font-size: 11px;
+    color: #cbd5e1;
+}
+
+.person {
+    display: inline-block;
+    margin: 2px;
+    padding: 2px 6px;
     border-radius: 6px;
     background: #1e293b;
+    font-size: 11px;
 }
-
-/* PRIORITY COLORS */
-.p1 { border-left: 3px solid #ef4444; }
-.p2 { border-left: 3px solid #f59e0b; }
-.p3 { border-left: 3px solid #3b82f6; }
 </style>
 </head>
 
 <body>
 
 <div class="header">
-    <h1>Project Briefing Dashboard</h1>
-    <div class="meta">ADO + Triage Intelligence View</div>
+    <h1>Project Command Dashboard</h1>
+    <div class="meta">ADO + Triage + Ownership View</div>
 </div>
 
 <div class="container" id="app"></div>
@@ -125,13 +149,8 @@ const projects = [
     name: "Checkout Platform",
     status: "Healthy",
     color: "green",
-
-    ado: {
-        epics: 5,
-        features: 12,
-        bugs: 24,
-        tasks: 18
-    },
+    created: "2025-11-01",
+    updated: "2026-04-18",
 
     triage: {
         priority: "P1",
@@ -140,34 +159,27 @@ const projects = [
         risk: "Medium"
     },
 
-    roles: {
-        dev: 3,
-        dba: 1,
-        ba: 2,
-        tester: 2
+    ado: {
+        Epics: { new: 2, progress: 3, done: 5 },
+        Features: { new: 4, progress: 3, done: 5 },
+        Bugs: { new: 3, progress: 6, done: 3 },
+        Tasks: { new: 5, progress: 6, done: 3 }
     },
 
-    attention: [
-        "QA queue growing",
-        "One critical bug in retry flow",
-        "Performance spike under load"
-    ],
-
-    created: "2025-11-01",
-    updated: "2026-04-18"
+    owners: {
+        dev: ["Alex", "Morgan"],
+        dba: ["Sam"],
+        ba: ["Jordan", "Casey"],
+        tester: ["Riley"]
+    }
 },
 
 {
     name: "Analytics Portal",
     status: "At Risk",
     color: "yellow",
-
-    ado: {
-        epics: 3,
-        features: 16,
-        bugs: 10,
-        tasks: 12
-    },
+    created: "2025-12-15",
+    updated: "2026-04-17",
 
     triage: {
         priority: "P2",
@@ -176,57 +188,19 @@ const projects = [
         risk: "High"
     },
 
-    roles: {
-        dev: 4,
-        dba: 1,
-        ba: 2,
-        tester: 3
-    },
-
-    attention: [
-        "QA bottleneck forming",
-        "Performance regression in dashboard",
-        "API latency increasing"
-    ],
-
-    created: "2025-12-15",
-    updated: "2026-04-17"
-},
-
-{
-    name: "Core Authentication System",
-    status: "Blocked",
-    color: "red",
-
     ado: {
-        epics: 2,
-        features: 4,
-        bugs: 11,
-        tasks: 9
+        Epics: { new: 1, progress: 4, done: 2 },
+        Features: { new: 6, progress: 5, done: 5 },
+        Bugs: { new: 2, progress: 3, done: 2 },
+        Tasks: { new: 3, progress: 4, done: 3 }
     },
 
-    triage: {
-        priority: "P1",
-        urgency: "Critical",
-        effort: "Large",
-        risk: "High"
-    },
-
-    roles: {
-        dev: 2,
-        dba: 2,
-        ba: 1,
-        tester: 1
-    },
-
-    attention: [
-        "DB schema blocking all progress",
-        "Security review pending",
-        "No movement in 6 days"
-    ],
-
-    created: "2025-10-10",
-    updated: "2026-04-16"
+    owners: {
+        dev: ["Taylor", "Jamie"],
+        dba: ["Sam"],
+        ba: ["Morgan"],
+        tester: ["Riley", "Casey"]
+    }
 }
 ];
 
@@ -236,7 +210,7 @@ function render(){
 
     projects.forEach(p=>{
         const div = document.createElement("div");
-        div.className = `card p${p.triage.priority.slice(1)}`;
+        div.className = "card";
 
         div.innerHTML = `
             <div class="title">${p.name}</div>
@@ -248,44 +222,64 @@ function render(){
                 Status: ${p.status}
             </div>
 
-            <div class="grid">
+            <!-- TRIAGE MOVED INTO HEADER -->
+            <div class="top">
 
-                <div class="block">
-                    <h4>ADO Work Breakdown</h4>
-                    <div>Epics: ${p.ado.epics}</div>
-                    <div>Features: ${p.ado.features}</div>
-                    <div>Bugs: ${p.ado.bugs}</div>
-                    <div>Tasks: ${p.ado.tasks}</div>
+                <div class="panel">
+                    <h4>Triage</h4>
+                    <div class="tag">Priority: ${p.triage.priority}</div>
+                    <div class="tag">Urgency: ${p.triage.urgency}</div>
+                    <div class="tag">Effort: ${p.triage.effort}</div>
+                    <div class="tag">Risk: ${p.triage.risk}</div>
                 </div>
 
-                <div class="block">
-                    <h4>Triage</h4>
-                    <div class="metrics">
-                        <div class="metric">Priority: ${p.triage.priority}</div>
-                        <div class="metric">Urgency: ${p.triage.urgency}</div>
-                        <div class="metric">Effort: ${p.triage.effort}</div>
-                        <div class="metric">Risk: ${p.triage.risk}</div>
+                <div class="panel">
+                    <h4>Assigned Roles</h4>
+
+                    <div><strong>Dev:</strong>
+                        ${p.owners.dev.map(x=>`<span class="person">${x}</span>`).join("")}
+                    </div>
+
+                    <div><strong>DBA:</strong>
+                        ${p.owners.dba.map(x=>`<span class="person">${x}</span>`).join("")}
+                    </div>
+
+                    <div><strong>BA:</strong>
+                        ${p.owners.ba.map(x=>`<span class="person">${x}</span>`).join("")}
+                    </div>
+
+                    <div><strong>Tester:</strong>
+                        ${p.owners.tester.map(x=>`<span class="person">${x}</span>`).join("")}
                     </div>
                 </div>
 
-                <div class="block">
-                    <h4>Assigned Roles</h4>
-                    <div>Dev: ${p.roles.dev}</div>
-                    <div>DBA: ${p.roles.dba}</div>
-                    <div>BA: ${p.roles.ba}</div>
-                    <div>Tester: ${p.roles.tester}</div>
-                </div>
+            </div>
 
-                <div class="block">
-                    <h4>Attention Needed</h4>
-                    ${p.attention.map(a=>`<div class="tag">${a}</div>`).join("")}
-                </div>
+            <!-- WORK ITEMS -->
+            <div class="work-grid">
+
+                ${renderWork("Epics", p.ado.Epics)}
+                ${renderWork("Features", p.ado.Features)}
+                ${renderWork("Bugs", p.ado.Bugs)}
+                ${renderWork("Tasks", p.ado.Tasks)}
 
             </div>
         `;
 
         app.appendChild(div);
     });
+}
+
+function renderWork(title, data){
+    return `
+    <div class="work">
+        <h5>${title}</h5>
+
+        <div class="row"><span>New</span><span>${data.new}</span></div>
+        <div class="row"><span>In Progress</span><span>${data.progress}</span></div>
+        <div class="row"><span>Done</span><span>${data.done}</span></div>
+    </div>
+    `;
 }
 
 render();
