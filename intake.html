@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intake Engine POC</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: #0b1220;
+    color: #e2e8f0;
+}
+
+/* HEADER */
+.header {
+    padding: 14px 20px;
+    background: #020617;
+    border-bottom: 1px solid #1e293b;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 18px;
+}
+
+/* LAYOUT */
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* CARD */
+.card {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 16px;
+}
+
+/* SECTION TITLE */
+.section-title {
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #94a3b8;
+}
+
+/* INPUTS */
+input, textarea, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border: 1px solid #1e293b;
+    background: #020617;
+    color: #e2e8f0;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ROW */
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* BUTTON */
+button {
+    background: #2563eb;
+    border: none;
+    padding: 10px 14px;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button.secondary {
+    background: #1e293b;
+}
+
+/* SUMMARY PANEL */
+.summary {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.summary h3 {
+    margin-top: 0;
+    font-size: 15px;
+}
+
+.badge {
+    background: #1e293b;
+    padding: 4px 8px;
+    margin-right: 6px;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Work Intake</h1>
+</div>
+
+<div class="container">
+
+    <div class="card">
+        <div class="section-title">Request Details</div>
+
+        <label>Title</label>
+        <input id="title" placeholder="Short, clear description" />
+
+        <label>Business Objective</label>
+        <textarea id="objective" placeholder="What problem are we solving?"></textarea>
+
+        <label>Requestor (True Origin)</label>
+        <input id="requestor" placeholder="Who is this really for?" />
+    </div>
+
+    <div class="card">
+        <div class="section-title">Classification</div>
+
+        <div class="row">
+            <div>
+                <label>Type</label>
+                <select id="type">
+                    <option>Bug</option>
+                    <option>Feature</option>
+                    <option>Enhancement</option>
+                    <option>Initiative</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Application</label>
+                <input id="app" placeholder="System / App name" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label>Urgency</label>
+                <select id="urgency">
+                    <option value="3">Low</option>
+                    <option value="6">Medium</option>
+                    <option value="9">High</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Impact</label>
+                <select id="impact">
+                    <option value="3">Low</option>
+                    <option value="6">Medium</option>
+                    <option value="9">High</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-title">Actions</div>
+        <button onclick="submitRequest()">Submit Request</button>
+        <button class="secondary" onclick="clearForm()">Clear</button>
+    </div>
+
+    <div class="summary" id="summary" style="display:none;">
+        <h3>Preview</h3>
+        <div id="previewContent"></div>
+    </div>
+
+</div>
+
+<script>
+function submitRequest(){
+    const title = document.getElementById("title").value;
+    const objective = document.getElementById("objective").value;
+    const requestor = document.getElementById("requestor").value;
+    const type = document.getElementById("type").value;
+    const app = document.getElementById("app").value;
+    const urgency = document.getElementById("urgency").value;
+    const impact = document.getElementById("impact").value;
+
+    const preview = `
+        <strong>${title}</strong><br/><br/>
+        ${objective}<br/><br/>
+
+        <span class="badge">${type}</span>
+        <span class="badge">${app}</span>
+        <span class="badge">Urgency ${urgency}</span>
+        <span class="badge">Impact ${impact}</span>
+        <br/><br/>
+        <em>Requested by: ${requestor}</em>
+    `;
+
+    document.getElementById("previewContent").innerHTML = preview;
+    document.getElementById("summary").style.display = "block";
+}
+
+function clearForm(){
+    document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+    document.getElementById("summary").style.display = "none";
+}
+</script>
+
+</body>
+</html>
