@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Overview Dashboard (Full POC)</title>
+<title>Project Overview Dashboard (Hierarchy Model)</title>
 
 <style>
 body {
@@ -21,18 +21,12 @@ body {
     justify-content: space-between;
 }
 
-.header h1 {
-    margin: 0;
-    font-size: 16px;
-}
-
 .container {
     max-width: 1200px;
     margin: auto;
     padding: 14px;
 }
 
-/* CARD */
 .card {
     border: 1px solid #1e293b;
     background: #020617;
@@ -49,40 +43,43 @@ body {
 .meta {
     font-size: 12px;
     color: #94a3b8;
-    margin-bottom: 10px;
 }
 
-/* STATUS */
-.status {
-    font-size: 12px;
-    font-weight: bold;
-}
+.status.green { color: #4ade80; }
+.status.yellow { color: #facc15; }
+.status.red { color: #f87171; }
 
-.green { color: #4ade80; }
-.yellow { color: #facc15; }
-.red { color: #f87171; }
-
-/* KPI ROW */
-.kpis {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin: 10px 0;
-}
-
-.kpi {
-    background: #1e293b;
-    padding: 4px 6px;
-    border-radius: 6px;
-    font-size: 11px;
-}
-
-/* GRID */
-.grid {
+/* HIERARCHY BLOCK */
+.hierarchy {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.block {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 8px;
     font-size: 11px;
+}
+
+.block h4 {
+    margin: 0 0 6px 0;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* STATUS ROWS */
+.row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin: 2px 0;
+}
+
+.label {
+    color: #cbd5f5;
 }
 
 /* ACCORDION */
@@ -100,14 +97,12 @@ body {
     font-size: 12px;
 }
 
-/* NOTES */
 .note {
     border-left: 2px solid #3b82f6;
     padding-left: 8px;
     margin-bottom: 6px;
 }
 
-/* TIMELINE */
 .timeline {
     border-left: 2px solid #1e293b;
     padding-left: 10px;
@@ -123,8 +118,8 @@ body {
 <body>
 
 <div class="header">
-    <h1>Project Overview Dashboard</h1>
-    <div class="meta">ADO Portfolio Intelligence View</div>
+    <h1>Project Overview (ADO Hierarchy Model)</h1>
+    <div class="meta">Epics → Features → Bugs → Tasks (Status Breakdown View)</div>
 </div>
 
 <div class="container" id="app"></div>
@@ -136,126 +131,86 @@ const projects = [
     id: 1,
     name: "Checkout Platform",
     status: "Healthy",
-    stateColor: "green",
+    color: "green",
     created: "2025-11-01",
     updated: "2026-04-18",
-    workItems: { Bug: 12, Feature: 8, Task: 14 },
-    stateCounts: { "In Progress": 9, "QA": 5, "Blocked": 3, "Done": 17 },
+
+    hierarchy: {
+        epics: { New: 2, "In Progress": 3, Done: 5 },
+        features: { New: 4, "In Progress": 3, Done: 5 },
+        bugs: { New: 3, "In Progress": 6, Done: 3 },
+        tasks: { New: 5, "In Progress": 6, Done: 3 }
+    },
+
     notes: [
-        {date:"2026-04-10", text:"Revenue-critical bug introduced in retry flow"},
-        {date:"2026-04-12", text:"Hotfix deployed, monitoring stability"},
-        {date:"2026-04-18", text:"QA backlog increasing slightly"}
+        {date:"2026-04-10", text:"Revenue bug in retry flow caused spike"},
+        {date:"2026-04-12", text:"Hotfix stabilized system"},
+        {date:"2026-04-18", text:"QA backlog slightly growing"}
     ],
+
     timeline: [
-        "2026-04-01 - Sprint started",
-        "2026-04-05 - Payment bug detected",
-        "2026-04-10 - Emergency patch deployed",
-        "2026-04-15 - QA bottleneck identified"
+        "2026-04-01 - Epic: Payment stability started",
+        "2026-04-05 - Bug surge detected",
+        "2026-04-10 - Emergency release",
+        "2026-04-15 - QA bottleneck"
     ]
 },
+
 {
     id: 2,
     name: "Analytics Portal",
     status: "At Risk",
-    stateColor: "yellow",
+    color: "yellow",
     created: "2025-12-15",
     updated: "2026-04-17",
-    workItems: { Bug: 5, Feature: 16, Task: 7 },
-    stateCounts: { "In Progress": 6, "QA": 7, "Blocked": 2, "Done": 13 },
+
+    hierarchy: {
+        epics: { New: 1, "In Progress": 4, Done: 2 },
+        features: { New: 6, "In Progress": 5, Done: 5 },
+        bugs: { New: 2, "In Progress": 3, Done: 2 },
+        tasks: { New: 3, "In Progress": 4, Done: 3 }
+    },
+
     notes: [
-        {date:"2026-04-02", text:"Dashboard redesign approved"},
-        {date:"2026-04-08", text:"Performance issues reported in QA"},
-        {date:"2026-04-16", text:"Data aggregation latency increasing"}
+        {date:"2026-04-08", text:"Performance regression in QA"},
+        {date:"2026-04-12", text:"Aggregation delays increasing"},
+        {date:"2026-04-17", text:"Risk flagged due to QA saturation"}
     ],
+
     timeline: [
-        "2026-04-01 - Sprint started",
-        "2026-04-08 - QA slowdown begins",
-        "2026-04-12 - API refactor started",
-        "2026-04-17 - Risk flagged"
+        "2026-04-01 - Analytics epic started",
+        "2026-04-08 - QA slowdown",
+        "2026-04-12 - API refactor began",
+        "2026-04-17 - Risk escalation"
     ]
 },
+
 {
     id: 3,
     name: "Core Authentication System",
     status: "Blocked",
-    stateColor: "red",
+    color: "red",
     created: "2025-10-10",
     updated: "2026-04-16",
-    workItems: { Bug: 9, Feature: 4, Task: 11 },
-    stateCounts: { "In Progress": 3, "QA": 2, "Blocked": 8, "Done": 11 },
+
+    hierarchy: {
+        epics: { New: 0, "In Progress": 2, Done: 3 },
+        features: { New: 1, "In Progress": 1, Done: 2 },
+        bugs: { New: 2, "In Progress": 5, Done: 2 },
+        tasks: { New: 3, "In Progress": 4, Done: 4 }
+    },
+
     notes: [
-        {date:"2026-04-03", text:"DB schema dependency delaying progress"},
-        {date:"2026-04-09", text:"Security review expanded scope"},
-        {date:"2026-04-16", text:"Still blocked on infrastructure approval"}
+        {date:"2026-04-03", text:"DB schema dependency blocking progress"},
+        {date:"2026-04-09", text:"Security audit expanded scope"},
+        {date:"2026-04-16", text:"Still blocked on infra approval"}
     ],
+
     timeline: [
-        "2026-03-28 - Refactor started",
-        "2026-04-03 - DB schema blocker introduced",
-        "2026-04-09 - Security audit expanded scope",
-        "2026-04-16 - No resolution"
-    ]
-},
-{
-    id: 4,
-    name: "Mobile App Experience",
-    status: "Healthy",
-    stateColor: "green",
-    created: "2025-09-20",
-    updated: "2026-04-18",
-    workItems: { Bug: 18, Feature: 12, Task: 9 },
-    stateCounts: { "In Progress": 10, "QA": 4, "Blocked": 1, "Done": 24 },
-    notes: [
-        {date:"2026-04-06", text:"UI refresh improved engagement"},
-        {date:"2026-04-14", text:"Crash rate reduced significantly"},
-        {date:"2026-04-18", text:"Stability confirmed across devices"}
-    ],
-    timeline: [
-        "2026-03-15 - Sprint ongoing",
-        "2026-04-06 - UI overhaul",
-        "2026-04-12 - Crash fix release",
-        "2026-04-18 - Stable baseline"
-    ]
-},
-{
-    id: 5,
-    name: "Reporting & BI Layer",
-    status: "At Risk",
-    stateColor: "yellow",
-    created: "2025-12-01",
-    updated: "2026-04-19",
-    workItems: { Bug: 6, Feature: 20, Task: 5 },
-    stateCounts: { "In Progress": 8, "QA": 9, "Blocked": 2, "Done": 12 },
-    notes: [
-        {date:"2026-04-05", text:"Schema changes increased QA load"},
-        {date:"2026-04-11", text:"Regression issues found"},
-        {date:"2026-04-19", text:"QA saturation detected"}
-    ],
-    timeline: [
-        "2026-03-25 - Expansion started",
-        "2026-04-05 - Schema changes",
-        "2026-04-11 - Regression issues",
-        "2026-04-19 - QA overload"
-    ]
-},
-{
-    id: 6,
-    name: "DevOps Automation Pipeline",
-    status: "Healthy",
-    stateColor: "green",
-    created: "2025-08-01",
-    updated: "2026-04-17",
-    workItems: { Bug: 3, Feature: 14, Task: 22 },
-    stateCounts: { "In Progress": 7, "QA": 3, "Blocked": 0, "Done": 29 },
-    notes: [
-        {date:"2026-04-02", text:"Pipeline speed improvements deployed"},
-        {date:"2026-04-10", text:"Build time reduced by 22%"},
-        {date:"2026-04-17", text:"Stable and optimized"}
-    ],
-    timeline: [
-        "2026-03-10 - Optimization sprint",
-        "2026-04-02 - CI improvements",
-        "2026-04-10 - Performance gains",
-        "2026-04-17 - Stable baseline"
+        "2026-03-28 - Auth epic started",
+        "2026-04-03 - DB blocker introduced",
+        "2026-04-09 - Security review expanded",
+        "2026-04-16 - Blocked state persists"
     ]
 }
 ];
@@ -268,26 +223,40 @@ function render(){
         const div = document.createElement("div");
         div.className = "card";
 
+        const h = p.hierarchy;
+
         div.innerHTML = `
             <div class="title">${p.name}</div>
             <div class="meta">
                 Created: ${p.created} | Updated: ${p.updated}
             </div>
 
-            <div class="status ${p.stateColor}">
+            <div class="status ${p.color}">
                 Status: ${p.status}
             </div>
 
-            <div class="kpis">
-                <div class="kpi">Bugs: ${p.workItems.Bug}</div>
-                <div class="kpi">Features: ${p.workItems.Feature}</div>
-                <div class="kpi">Tasks: ${p.workItems.Task}</div>
-            </div>
+            <div class="hierarchy">
 
-            <div class="grid">
-                <div>In Progress: ${p.stateCounts["In Progress"]}</div>
-                <div>QA: ${p.stateCounts["QA"]}</div>
-                <div>Blocked: ${p.stateCounts["Blocked"]}</div>
+                <div class="block">
+                    <h4>Epics</h4>
+                    ${format(h.epics)}
+                </div>
+
+                <div class="block">
+                    <h4>Features</h4>
+                    ${format(h.features)}
+                </div>
+
+                <div class="block">
+                    <h4>Bugs</h4>
+                    ${format(h.bugs)}
+                </div>
+
+                <div class="block">
+                    <h4>Tasks</h4>
+                    ${format(h.tasks)}
+                </div>
+
             </div>
 
             <div class="section" onclick="toggle(this)">
@@ -314,6 +283,12 @@ function render(){
 
         app.appendChild(div);
     });
+}
+
+function format(obj){
+    return Object.entries(obj).map(([k,v])=>{
+        return `<div class="row"><span class="label">${k}</span><span>${v}</span></div>`;
+    }).join("");
 }
 
 function toggle(el){
