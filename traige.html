@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Triage Meeting POC</title>
+<title>Triage Workbench</title>
 
 <style>
 body {
@@ -18,8 +18,6 @@ body {
     padding: 14px 20px;
     background: #020617;
     border-bottom: 1px solid #1e293b;
-    display: flex;
-    justify-content: space-between;
 }
 
 .header h1 {
@@ -27,80 +25,73 @@ body {
     font-size: 18px;
 }
 
-/* LAYOUT */
+/* GRID */
 .container {
     display: grid;
-    grid-template-columns: 300px 1fr;
-    height: calc(100vh - 50px);
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    padding: 16px;
 }
 
-/* LEFT LIST */
-.list {
-    border-right: 1px solid #1e293b;
-    overflow-y: auto;
-}
-
-.item {
-    padding: 12px;
-    border-bottom: 1px solid #1e293b;
-    cursor: pointer;
-}
-
-.item:hover {
-    background: #1e293b;
-}
-
-.item.active {
-    background: #2563eb;
-}
-
-.item small {
-    color: #94a3b8;
-}
-
-/* MAIN PANEL */
-.main {
-    padding: 20px;
-    overflow-y: auto;
-}
-
-.title {
-    font-size: 20px;
-    margin-bottom: 10px;
-}
-
-.meta {
-    font-size: 13px;
-    color: #94a3b8;
-    margin-bottom: 15px;
-}
-
-.section {
-    margin-bottom: 20px;
-}
-
-textarea {
-    width: 100%;
-    min-height: 80px;
+/* CARD */
+.card {
     background: #020617;
     border: 1px solid #1e293b;
-    color: white;
-    padding: 8px;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: 0.2s;
+}
+
+.card:hover {
+    border-color: #3b82f6;
+}
+
+/* TITLE */
+.title {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+/* META */
+.meta {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* INPUTS */
+select, input {
+    width: 100%;
+    padding: 6px;
+    background: #020617;
+    border: 1px solid #1e293b;
+    color: #e2e8f0;
     border-radius: 6px;
+    font-size: 12px;
+}
+
+/* ROW */
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
 }
 
 /* BUTTONS */
 .actions {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
 button {
     border: none;
-    padding: 10px 14px;
+    padding: 6px 10px;
     border-radius: 6px;
     cursor: pointer;
+    font-size: 12px;
 }
 
 .approve { background: #16a34a; }
@@ -108,138 +99,112 @@ button {
 .reject { background: #dc2626; }
 .clarify { background: #2563eb; }
 
-.next {
-    margin-left: auto;
-    background: #1e293b;
-}
-
-/* DECISION LOG */
-.log {
-    margin-top: 20px;
+/* STATUS */
+.status {
     font-size: 12px;
-    color: #cbd5f5;
+    font-weight: bold;
 }
 
-.log-entry {
-    border-top: 1px solid #1e293b;
-    padding-top: 6px;
-    margin-top: 6px;
-}
+.status.Approved { color: #4ade80; }
+.status.Deferred { color: #facc15; }
+.status.Rejected { color: #f87171; }
+.status["Needs Clarification"] { color: #60a5fa; }
+
 </style>
 </head>
 
 <body>
 
 <div class="header">
-    <h1>Triage Meeting</h1>
-    <div id="counter"></div>
+    <h1>Triage Workbench</h1>
 </div>
 
-<div class="container">
-
-    <!-- LEFT PANEL -->
-    <div class="list" id="list"></div>
-
-    <!-- RIGHT PANEL -->
-    <div class="main">
-        <div id="details"></div>
-    </div>
-
-</div>
+<div id="container" class="container"></div>
 
 <script>
 const data = [
-    {id:1, title:"Fix payment bug", app:"Checkout", type:"Bug", desc:"Users cannot complete payment.", status:"Pending"},
-    {id:2, title:"New reporting dashboard", app:"Portal", type:"Feature", desc:"Need analytics for users.", status:"Pending"},
-    {id:3, title:"Refactor login system", app:"Core", type:"Initiative", desc:"Improve security and scalability.", status:"Pending"}
+    {id:1, title:"Fix payment bug", desc:"Users cannot complete payment.", app:"Checkout", type:"Bug", urgency:6, impact:9, effort:3, status:"Pending"},
+    {id:2, title:"New dashboard", desc:"Need reporting tools.", app:"Portal", type:"Feature", urgency:5, impact:8, effort:5, status:"Pending"},
+    {id:3, title:"Refactor auth", desc:"Improve login system.", app:"Core", type:"Initiative", urgency:4, impact:7, effort:8, status:"Pending"}
 ];
 
-let currentIndex = 0;
-let decisions = [];
-
-function renderList(){
-    const list = document.getElementById("list");
-    list.innerHTML = "";
-
-    data.forEach((item, index)=>{
-        const div = document.createElement("div");
-        div.className = "item" + (index === currentIndex ? " active" : "");
-        div.innerHTML = `
-            <strong>${item.title}</strong><br/>
-            <small>${item.app} • ${item.type}</small>
-        `;
-        div.onclick = ()=>{
-            currentIndex = index;
-            render();
-        };
-        list.appendChild(div);
-    });
-
-    document.getElementById("counter").innerText =
-        `${currentIndex+1} / ${data.length}`;
-}
-
-function renderDetails(){
-    const item = data[currentIndex];
-    const container = document.getElementById("details");
-
-    container.innerHTML = `
-        <div class="title">${item.title}</div>
-        <div class="meta">${item.app} • ${item.type}</div>
-
-        <div class="section">
-            <strong>Description</strong>
-            <p>${item.desc}</p>
-        </div>
-
-        <div class="section">
-            <strong>Decision Notes</strong>
-            <textarea id="notes" placeholder="Why are we making this decision?"></textarea>
-        </div>
-
-        <div class="actions">
-            <button class="approve" onclick="decide('Approved')">Approve</button>
-            <button class="defer" onclick="decide('Deferred')">Defer</button>
-            <button class="reject" onclick="decide('Rejected')">Reject</button>
-            <button class="clarify" onclick="decide('Needs Clarification')">Clarify</button>
-            <button class="next" onclick="nextItem()">Next →</button>
-        </div>
-
-        <div class="log">
-            <strong>Decision Log</strong>
-            ${decisions.map(d => `
-                <div class="log-entry">
-                    ${d.title} → ${d.decision}<br/>
-                    <em>${d.notes || "No notes"}</em>
-                </div>
-            `).join("")}
-        </div>
-    `;
-}
-
-function decide(decision){
-    const notes = document.getElementById("notes").value;
-
-    decisions.push({
-        title: data[currentIndex].title,
-        decision,
-        notes
-    });
-
-    data[currentIndex].status = decision;
-    nextItem();
-}
-
-function nextItem(){
-    if(currentIndex < data.length - 1){
-        currentIndex++;
-    }
-    render();
-}
-
 function render(){
-    renderList();
-    renderDetails();
+    const container = document.getElementById("container");
+    container.innerHTML = "";
+
+    data.forEach(item=>{
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <div class="title">${item.title}</div>
+            <div class="meta">${item.desc}</div>
+
+            <div class="row">
+                <div>
+                    <label>App</label>
+                    <input value="${item.app}" onchange="update(${item.id}, 'app', this.value)" />
+                </div>
+                <div>
+                    <label>Type</label>
+                    <select onchange="update(${item.id}, 'type', this.value)">
+                        <option ${item.type==="Bug"?"selected":""}>Bug</option>
+                        <option ${item.type==="Feature"?"selected":""}>Feature</option>
+                        <option ${item.type==="Enhancement"?"selected":""}>Enhancement</option>
+                        <option ${item.type==="Initiative"?"selected":""}>Initiative</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div>
+                    <label>Urgency</label>
+                    <select onchange="update(${item.id}, 'urgency', this.value)">
+                        <option value="3" ${item.urgency==3?"selected":""}>Low</option>
+                        <option value="6" ${item.urgency==6?"selected":""}>Medium</option>
+                        <option value="9" ${item.urgency==9?"selected":""}>High</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Impact</label>
+                    <select onchange="update(${item.id}, 'impact', this.value)">
+                        <option value="3" ${item.impact==3?"selected":""}>Low</option>
+                        <option value="6" ${item.impact==6?"selected":""}>Medium</option>
+                        <option value="9" ${item.impact==9?"selected":""}>High</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label>Effort (Sprints)</label>
+                <input type="number" value="${item.effort}" onchange="update(${item.id}, 'effort', this.value)" />
+            </div>
+
+            <div class="actions">
+                <button class="approve" onclick="decide(${item.id}, 'Approved')">Approve</button>
+                <button class="defer" onclick="decide(${item.id}, 'Deferred')">Defer</button>
+                <button class="reject" onclick="decide(${item.id}, 'Rejected')">Reject</button>
+                <button class="clarify" onclick="decide(${item.id}, 'Needs Clarification')">Clarify</button>
+            </div>
+
+            <div class="status ${item.status}">
+                Status: ${item.status}
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+function update(id, field, value){
+    const item = data.find(i=>i.id===id);
+    item[field] = value;
+}
+
+function decide(id, decision){
+    const item = data.find(i=>i.id===id);
+    item.status = decision;
+    render();
 }
 
 render();
