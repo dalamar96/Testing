@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Project Flight Deck Dashboard</title>
+<title>Project Flight Deck</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -19,7 +19,6 @@ body {
     border-bottom: 1px solid #1e293b;
 }
 
-/* GRID */
 .container {
     max-width: 1100px;
     margin: auto;
@@ -33,14 +32,7 @@ body {
     border-radius: 10px;
     padding: 14px;
     margin-bottom: 14px;
-}
-
-/* TOP HEADER */
-.top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
+    cursor: pointer;
 }
 
 .title {
@@ -53,12 +45,11 @@ body {
     color: #94a3b8;
 }
 
-/* TRIAGE INLINE */
+/* TRIAGE */
 .triage {
     display: flex;
-    flex-wrap: wrap;
     gap: 6px;
-    justify-content: flex-end;
+    flex-wrap: wrap;
 }
 
 .tag {
@@ -66,13 +57,7 @@ body {
     padding: 3px 6px;
     border-radius: 6px;
     background: #1e293b;
-    color: #cbd5e1;
 }
-
-/* STATUS */
-.status.green { color: #4ade80; }
-.status.yellow { color: #facc15; }
-.status.red { color: #f87171; }
 
 /* WORK GRID */
 .work-grid {
@@ -89,20 +74,11 @@ body {
     padding: 10px;
 }
 
-.work h5 {
-    margin: 0 0 8px 0;
-    font-size: 12px;
-    color: #94a3b8;
-}
-
-/* PROGRESS BAR */
 .bar {
-    width: 100%;
     height: 8px;
     background: #1e293b;
     border-radius: 6px;
     overflow: hidden;
-    margin-top: 6px;
 }
 
 .fill {
@@ -110,17 +86,35 @@ body {
     background: #4ade80;
 }
 
-/* COLORS BY TYPE */
-.epic { background: #60a5fa; }
-.feature { background: #a78bfa; }
-.bug { background: #f87171; }
-.task { background: #facc15; }
+/* NOTES PANEL */
+.notes {
+    margin-top: 12px;
+    border-top: 1px solid #1e293b;
+    padding-top: 10px;
+    display: none;
+}
 
-/* LABEL ROW */
-.row {
+.note {
+    padding: 8px;
+    border-bottom: 1px solid #1e293b;
+    font-size: 12px;
+}
+
+.note-header {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.note-type {
+    font-weight: bold;
     font-size: 11px;
+    color: #60a5fa;
+}
+
+.note a {
+    color: #93c5fd;
+    text-decoration: none;
 }
 </style>
 </head>
@@ -138,8 +132,6 @@ body {
 const projects = [
 {
     name: "Checkout Platform",
-    status: "Healthy",
-    color: "green",
     created: "2025-11-01",
     updated: "2026-04-18",
 
@@ -155,29 +147,31 @@ const projects = [
         Features: { done: 5, total: 12 },
         Bugs: { done: 3, total: 12 },
         Tasks: { done: 3, total: 14 }
-    }
-},
-
-{
-    name: "Analytics Portal",
-    status: "At Risk",
-    color: "yellow",
-    created: "2025-12-15",
-    updated: "2026-04-17",
-
-    triage: {
-        priority: "P2",
-        urgency: "Medium",
-        effort: "Large",
-        risk: "High"
     },
 
-    ado: {
-        Epics: { done: 2, total: 5 },
-        Features: { done: 5, total: 16 },
-        Bugs: { done: 2, total: 7 },
-        Tasks: { done: 3, total: 10 }
-    }
+    notes: [
+        {
+            date: "2026-04-18 14:32",
+            type: "Bug",
+            title: "Retry Logic Failure",
+            link: "#",
+            text: "Fix deployed, monitoring for recurrence"
+        },
+        {
+            date: "2026-04-17 09:12",
+            type: "Feature",
+            title: "Payment Retry Enhancement",
+            link: "#",
+            text: "Feature completed and merged"
+        },
+        {
+            date: "2026-04-15 16:45",
+            type: "Epic",
+            title: "Checkout Stability Initiative",
+            link: "#",
+            text: "QA backlog identified"
+        }
+    ]
 }
 ];
 
@@ -185,39 +179,44 @@ function render(){
     const app = document.getElementById("app");
     app.innerHTML = "";
 
-    projects.forEach(p=>{
+    projects.forEach((p, i)=>{
         const div = document.createElement("div");
         div.className = "card";
+        div.onclick = () => toggleNotes(i);
 
         div.innerHTML = `
-            <div class="top">
+            <div class="title">${p.name}</div>
+            <div class="meta">
+                Created: ${p.created} | Updated: ${p.updated}
+            </div>
 
-                <div>
-                    <div class="title">${p.name}</div>
-                    <div class="meta">
-                        Created: ${p.created} | Updated: ${p.updated}
-                    </div>
-                    <div class="status ${p.color}">
-                        Status: ${p.status}
-                    </div>
-                </div>
-
-                <div class="triage">
-                    <span class="tag">Priority ${p.triage.priority}</span>
-                    <span class="tag">Urgency ${p.triage.urgency}</span>
-                    <span class="tag">Effort ${p.triage.effort}</span>
-                    <span class="tag">Risk ${p.triage.risk}</span>
-                </div>
-
+            <div class="triage">
+                <span class="tag">P: ${p.triage.priority}</span>
+                <span class="tag">Urgency: ${p.triage.urgency}</span>
+                <span class="tag">Effort: ${p.triage.effort}</span>
+                <span class="tag">Risk: ${p.triage.risk}</span>
             </div>
 
             <div class="work-grid">
+                ${work("Epics", p.ado.Epics)}
+                ${work("Features", p.ado.Features)}
+                ${work("Bugs", p.ado.Bugs)}
+                ${work("Tasks", p.ado.Tasks)}
+            </div>
 
-                ${workBlock("Epics", p.ado.Epics, "epic")}
-                ${workBlock("Features", p.ado.Features, "feature")}
-                ${workBlock("Bugs", p.ado.Bugs, "bug")}
-                ${workBlock("Tasks", p.ado.Tasks, "task")}
-
+            <div class="notes" id="notes-${i}">
+                ${p.notes.map(n=>`
+                    <div class="note">
+                        <div class="note-header">
+                            <span class="note-type">${n.type}</span>
+                            <span>${n.date}</span>
+                        </div>
+                        <div>
+                            <a href="${n.link}">${n.title}</a>
+                        </div>
+                        <div>${n.text}</div>
+                    </div>
+                `).join("")}
             </div>
         `;
 
@@ -225,23 +224,22 @@ function render(){
     });
 }
 
-function workBlock(name, data, cls){
+function work(name, data){
     const percent = Math.round((data.done / data.total) * 100);
-
     return `
-    <div class="work">
-        <h5>${name}</h5>
-
-        <div class="row">
-            <span>${data.done} / ${data.total}</span>
-            <span>${percent}%</span>
+        <div class="work">
+            <div>${name}</div>
+            <div>${data.done}/${data.total}</div>
+            <div class="bar">
+                <div class="fill" style="width:${percent}%"></div>
+            </div>
         </div>
-
-        <div class="bar">
-            <div class="fill ${cls}" style="width:${percent}%"></div>
-        </div>
-    </div>
     `;
+}
+
+function toggleNotes(i){
+    const el = document.getElementById("notes-" + i);
+    el.style.display = el.style.display === "block" ? "none" : "block";
 }
 
 render();
