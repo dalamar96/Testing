@@ -3,374 +3,892 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Live Work Dashboard (ADO-style POC)</title>
+<title>Executive Work Dashboard</title>
 
 <style>
-body {
-    margin: 0;
-    font-family: system-ui, sans-serif;
-    background: #0b1220;
-    color: #e2e8f0;
+:root{
+  --bg:#0b1220;
+  --panel:#020617;
+  --panel2:#0f172a;
+  --border:#1e293b;
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+  --green:#4ade80;
+  --yellow:#facc15;
+  --red:#f87171;
+  --blue:#60a5fa;
+  --violet:#a78bfa;
 }
 
-/* HEADER */
-.header {
-    padding: 14px 18px;
-    background: #020617;
-    border-bottom: 1px solid #1e293b;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
-.header h1 {
-    font-size: 16px;
-    margin: 0;
+.header{
+  position:sticky;
+  top:0;
+  z-index:40;
+  background:rgba(2,6,23,.96);
+  backdrop-filter: blur(8px);
+  border-bottom:1px solid var(--border);
+  padding:14px 18px;
 }
 
-.filters {
-    display: flex;
-    gap: 8px;
+.header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
 }
 
-select {
-    background: #020617;
-    color: #e2e8f0;
-    border: 1px solid #1e293b;
-    padding: 6px;
-    border-radius: 6px;
+.header h1{
+  margin:0;
+  font-size:20px;
 }
 
-/* LAYOUT */
-.container {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 14px;
-    padding: 14px;
-    max-width: 1300px;
-    margin: auto;
+.subtle{
+  color:var(--muted);
+  font-size:12px;
 }
 
-/* PANELS */
-.panel {
-    background: #020617;
-    border: 1px solid #1e293b;
-    border-radius: 10px;
-    padding: 12px;
+.page{
+  max-width:1600px;
+  margin:auto;
+  padding:14px;
 }
 
-/* CARD */
-.card {
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: 0.15s;
+.kpi-row{
+  display:grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap:10px;
+  margin-bottom:14px;
 }
 
-.card:hover {
-    border-color: #3b82f6;
+.kpi{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
 }
 
-.title {
-    font-size: 13px;
-    font-weight: 600;
+.kpi-label{
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
 }
 
-.meta {
-    font-size: 11px;
-    color: #94a3b8;
+.kpi-value{
+  font-size:24px;
+  font-weight:700;
+  margin-top:6px;
 }
 
-/* STATUS */
-.status {
-    font-size: 11px;
-    font-weight: bold;
+.kpi-sub{
+  font-size:11px;
+  color:#cbd5e1;
+  margin-top:4px;
 }
 
-.dev { color: #60a5fa; }
-.qa { color: #facc15; }
-.blocked { color: #f87171; }
-.done { color: #4ade80; }
-
-/* PROGRESS */
-.progress {
-    height: 6px;
-    background: #1e293b;
-    border-radius: 6px;
-    overflow: hidden;
-    margin-top: 6px;
+.main-grid{
+  display:grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap:14px;
 }
 
-.bar {
-    height: 100%;
-    background: #22c55e;
+.stack{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
 }
 
-/* DETAIL PANEL */
-.detail {
-    position: sticky;
-    top: 10px;
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
 }
 
-.section {
-    margin-bottom: 12px;
+.panel-head{
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
 }
 
-.section h3 {
-    font-size: 12px;
-    margin-bottom: 6px;
-    color: #94a3b8;
+.panel-title{
+  font-size:13px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.04em;
 }
 
-.tag {
-    display: inline-block;
-    background: #1e293b;
-    padding: 3px 6px;
-    border-radius: 6px;
-    font-size: 11px;
-    margin-right: 4px;
+.panel-body{
+  padding:12px;
 }
 
-/* BUTTONS */
-button {
-    background: #1e293b;
-    color: white;
-    border: none;
-    padding: 6px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 11px;
+.card-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-button.primary {
-    background: #2563eb;
+.work-card{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
 }
 
-/* GRID */
-.row {
-    display: grid;
+.work-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+
+.work-name{
+  font-size:15px;
+  font-weight:700;
+}
+
+.work-meta{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:3px;
+}
+
+.badges{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:11px;
+  border:1px solid var(--border);
+  background:#13213e;
+  color:#cbd5e1;
+  white-space:nowrap;
+}
+
+.status-Healthy{ color:var(--green); }
+.status-At\ Risk{ color:var(--yellow); }
+.status-Blocked{ color:var(--red); }
+
+.priority-P1{ color:#fca5a5; }
+.priority-P2{ color:#fde68a; }
+.priority-P3{ color:#93c5fd; }
+.priority-P4{ color:#cbd5e1; }
+
+.metrics{
+  display:grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap:8px;
+  margin-top:12px;
+}
+
+.metric{
+  background:#0b152a;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px;
+}
+
+.metric-label{
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+
+.metric-value{
+  font-size:16px;
+  font-weight:700;
+  margin-top:4px;
+}
+
+.progress-wrap{
+  margin-top:12px;
+}
+
+.progress-bar{
+  height:10px;
+  background:#111c31;
+  border:1px solid var(--border);
+  border-radius:999px;
+  overflow:hidden;
+  display:flex;
+}
+
+.seg-new{ background:var(--blue); }
+.seg-progress{ background:var(--yellow); }
+.seg-qa{ background:var(--violet); }
+.seg-blocked{ background:var(--red); }
+.seg-done{ background:var(--green); }
+
+.progress-legend{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  font-size:11px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+.note{
+  border-left:3px solid #2563eb;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-left-width:3px;
+  border-radius:10px;
+  padding:10px 12px;
+}
+
+.note-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+
+.timeline{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.timeline-item{
+  display:grid;
+  grid-template-columns: 120px 1fr;
+  gap:10px;
+  align-items:start;
+}
+
+.timeline-date{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.timeline-card{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+}
+
+.mini-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.mini-item{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:10px;
+  align-items:start;
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.mini-item:last-child{
+  border-bottom:none;
+}
+
+.mini-name{
+  font-size:13px;
+  font-weight:600;
+}
+
+.mini-sub{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:3px;
+}
+
+.pill{
+  display:inline-block;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:11px;
+  border:1px solid var(--border);
+  background:#13213e;
+}
+
+@media (max-width: 1280px){
+  .kpi-row{
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .main-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px){
+  .kpi-row{
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+  }
+  .metrics{
+    grid-template-columns: 1fr 1fr;
+  }
+  .timeline-item{
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
-
 <body>
 
 <div class="header">
-    <h1>Live Work Dashboard (ADO Feed)</h1>
-
-    <div class="filters">
-        <select id="statusFilter" onchange="render()">
-            <option value="ALL">All Status</option>
-            <option value="In Progress">In Progress</option>
-            <option value="QA">QA</option>
-            <option value="Blocked">Blocked</option>
-        </select>
-
-        <select id="teamFilter" onchange="render()">
-            <option value="ALL">All Teams</option>
-            <option value="Core">Core</option>
-            <option value="Portal">Portal</option>
-            <option value="Checkout">Checkout</option>
-        </select>
+  <div class="header-top">
+    <div>
+      <h1>Executive Work Dashboard</h1>
+      <div class="subtle">Current delivery, next-up queue, timing, and decision-level notes</div>
     </div>
+    <div class="subtle">Updated April 21, 2026</div>
+  </div>
 </div>
 
-<div class="container">
+<div class="page">
 
-    <!-- LEFT: WORK STREAM -->
-    <div class="panel">
-        <div id="list"></div>
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <div class="main-grid">
+
+    <div class="stack">
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Current Work</div>
+          <div class="subtle">What is actively moving now</div>
+        </div>
+        <div class="panel-body">
+          <div class="card-list" id="currentWork"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Next In Queue</div>
+          <div class="subtle">What leadership should expect to start next</div>
+        </div>
+        <div class="panel-body">
+          <div class="card-list" id="nextQueue"></div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- RIGHT: DETAIL VIEW -->
-    <div class="panel detail" id="detail">
-        <div style="color:#94a3b8;">Select an item to inspect</div>
+    <div class="stack">
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Risks / Blockers</div>
+          <div class="subtle">Only things that need attention</div>
+        </div>
+        <div class="panel-body">
+          <div class="mini-list" id="riskList"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Upcoming Timelines</div>
+          <div class="subtle">Milestones, targets, and likely pressure points</div>
+        </div>
+        <div class="panel-body">
+          <div class="timeline" id="timelineList"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">High-Level Notes</div>
+          <div class="subtle">Leadership digest, not ticket noise</div>
+        </div>
+        <div class="panel-body">
+          <div class="card-list" id="highNotes"></div>
+        </div>
+      </div>
+
     </div>
 
+  </div>
 </div>
 
 <script>
+const dashboardData = {
+  currentWork: [
+    {
+      name: "Claims Modernization Platform",
+      domain: "Claims / Core",
+      type: "New Application",
+      status: "At Risk",
+      priority: "P1",
+      urgency: "Critical",
+      effort: "Very Large",
+      risk: "High",
+      sponsor: "Claims Operations",
+      businessValue: "High",
+      confidence: "Medium",
+      targetMilestone: "Phase 1 Pilot - May 30",
+      whyNow: "Legacy replacement and operational bottlenecks",
+      expectedOutcome: "Reduce manual claim routing and improve intake speed",
+      leads: ["Alex", "Jordan"],
+      metrics: {
+        total: 2143,
+        active: 312,
+        blocked: 41,
+        qa: 62,
+        done: 1458,
+        openBugs: 27,
+        donePercent: 68
+      },
+      notes: [
+        "Leadership approved phased rollout instead of one large cutover.",
+        "Schema and approval dependencies are the biggest drag on pace.",
+        "Still strategically important despite short-term delivery pressure."
+      ]
+    },
+    {
+      name: "Field Services Mobile",
+      domain: "Mobile",
+      type: "New Application",
+      status: "Healthy",
+      priority: "P2",
+      urgency: "High",
+      effort: "Large",
+      risk: "Medium",
+      sponsor: "Operations",
+      businessValue: "High",
+      confidence: "High",
+      targetMilestone: "Field Pilot - June 12",
+      whyNow: "Operational efficiency and technician productivity",
+      expectedOutcome: "Reduce field rework and improve offline completion rates",
+      leads: ["Casey"],
+      metrics: {
+        total: 411,
+        active: 58,
+        blocked: 5,
+        qa: 10,
+        done: 318,
+        openBugs: 9,
+        donePercent: 77
+      },
+      notes: [
+        "Program is moving well and holding its release rhythm.",
+        "Most remaining work is refinement, sync stability, and field validation."
+      ]
+    },
+    {
+      name: "Identity Access Refresh",
+      domain: "Security",
+      type: "Mixed",
+      status: "At Risk",
+      priority: "P1",
+      urgency: "High",
+      effort: "Large",
+      risk: "High",
+      sponsor: "Security Office",
+      businessValue: "High",
+      confidence: "Medium",
+      targetMilestone: "Role Model Cutover - May 22",
+      whyNow: "Audit findings and access control risk",
+      expectedOutcome: "Tighter controls and lower role drift",
+      leads: ["Priya"],
+      metrics: {
+        total: 224,
+        active: 47,
+        blocked: 8,
+        qa: 9,
+        done: 156,
+        openBugs: 12,
+        donePercent: 70
+      },
+      notes: [
+        "Still moving, but risk remains elevated due to security findings.",
+        "This one matters more than its size suggests."
+      ]
+    },
+    {
+      name: "Customer Portal Refresh",
+      domain: "Customer Experience",
+      type: "Enhancement",
+      status: "Healthy",
+      priority: "P2",
+      urgency: "Medium",
+      effort: "Large",
+      risk: "Medium",
+      sponsor: "Digital Experience",
+      businessValue: "Medium",
+      confidence: "High",
+      targetMilestone: "Wave 2 Release - May 10",
+      whyNow: "Customer usability and funnel conversion improvements",
+      expectedOutcome: "Higher completion rate and fewer support contacts",
+      leads: ["Morgan"],
+      metrics: {
+        total: 284,
+        active: 39,
+        blocked: 4,
+        qa: 7,
+        done: 228,
+        openBugs: 6,
+        donePercent: 80
+      },
+      notes: [
+        "Healthy overall and trending toward completion without major surprises."
+      ]
+    }
+  ],
 
-/*
-  ADO-style data model (simplified)
-  In real life this maps to:
-  - Work Item ID
-  - Title
-  - State
-  - AssignedTo
-  - IterationPath
-  - RemainingWork
-  - Tags
-*/
+  nextQueue: [
+    {
+      name: "Reporting Warehouse",
+      domain: "BI / Data",
+      type: "Enhancement",
+      priority: "P2",
+      urgency: "Medium",
+      sponsor: "Executive Reporting",
+      targetMilestone: "Latency Improvement Window - May 18",
+      reason: "Needed to support exec dashboards and reporting reliability.",
+      expectedOutcome: "Lower latency and more stable reporting refreshes",
+      effort: "Large"
+    },
+    {
+      name: "Document Generation Engine",
+      domain: "Shared Services",
+      type: "Mixed",
+      priority: "P2",
+      urgency: "High",
+      sponsor: "Document Services",
+      targetMilestone: "Vendor Decision - May 6",
+      reason: "Blocked now, but likely to re-enter active work immediately after decision.",
+      expectedOutcome: "Stabilize template generation and unblock dependent teams",
+      effort: "Large"
+    },
+    {
+      name: "Payments Reliability",
+      domain: "Checkout",
+      type: "Bug Fix",
+      priority: "P1",
+      urgency: "High",
+      sponsor: "Revenue Systems",
+      targetMilestone: "Gateway Resolution - ASAP",
+      reason: "Revenue-sensitive and likely to jump forward once dependency clears.",
+      expectedOutcome: "Lower duplicate capture and timeout risk",
+      effort: "Medium"
+    },
+    {
+      name: "Provider Credentialing Hub",
+      domain: "Provider",
+      type: "New Application",
+      priority: "P3",
+      urgency: "Medium",
+      sponsor: "Provider Services",
+      targetMilestone: "Discovery Complete - June 3",
+      reason: "Strong strategic value, but below current top-tier pressure.",
+      expectedOutcome: "Streamline credentialing intake and approval visibility",
+      effort: "Large"
+    }
+  ],
 
-const workItems = [
-{
-    id: 1001,
-    title: "Payment API failure on retry",
-    team: "Checkout",
-    type: "Bug",
-    state: "In Progress",
-    assignedTo: "Chad",
-    progress: 65,
-    remainingWork: 2,
-    tags: ["revenue", "urgent"],
-    linked: ["ADO-7782", "ADO-7790"],
-    notes: "Intermittent timeout in retry layer",
-    history: [
-        "Created from production incident",
-        "Assigned to dev",
-        "Root cause identified"
-    ]
-},
-{
-    id: 1002,
-    title: "Analytics dashboard aggregation",
-    team: "Portal",
-    type: "Feature",
-    state: "QA",
-    assignedTo: "Alex",
-    progress: 80,
-    remainingWork: 1,
-    tags: ["reporting"],
-    linked: ["ADO-8012"],
-    notes: "Waiting QA signoff on filtering logic",
-    history: [
-        "Dev complete",
-        "Deployed to QA",
-        "QA feedback in progress"
-    ]
-},
-{
-    id: 1003,
-    title: "Auth system refactor",
-    team: "Core",
-    type: "Initiative",
-    state: "Blocked",
-    assignedTo: "Team",
-    progress: 30,
-    remainingWork: 5,
-    tags: ["security"],
-    linked: ["ADO-8120", "ADO-8121"],
-    notes: "Waiting on DB schema approval",
-    history: [
-        "Design approved",
-        "Blocked by DB dependency"
-    ]
+  risks: [
+    {
+      name: "Claims Modernization Platform",
+      issue: "41 blocked items and heavy active load",
+      why: "Approval and schema dependencies are slowing forward motion",
+      severity: "High"
+    },
+    {
+      name: "Payments Reliability",
+      issue: "Vendor / gateway dependency blocking bug resolution",
+      why: "Revenue-sensitive issue cluster remains partially unresolved",
+      severity: "High"
+    },
+    {
+      name: "Identity Access Refresh",
+      issue: "Security findings continue to create follow-up work",
+      why: "Scope pressure may grow if not contained",
+      severity: "Medium"
+    },
+    {
+      name: "Reporting Warehouse",
+      issue: "Latency and QA pressure",
+      why: "Likely to become more urgent if reporting cycle slips",
+      severity: "Medium"
+    }
+  ],
+
+  timelines: [
+    {
+      date: "Apr 29",
+      title: "Payments vendor response expected",
+      text: "This may determine whether Payments Reliability can move out of blocked status."
+    },
+    {
+      date: "May 6",
+      title: "Document Generation vendor decision",
+      text: "Could immediately re-open active implementation work."
+    },
+    {
+      date: "May 10",
+      title: "Customer Portal Wave 2 target",
+      text: "Currently on track and should close a visible enhancement stream."
+    },
+    {
+      date: "May 22",
+      title: "Identity role model cutover target",
+      text: "Important security milestone with moderate delivery risk."
+    },
+    {
+      date: "May 30",
+      title: "Claims Phase 1 pilot target",
+      text: "Largest current initiative and the biggest schedule watch item."
+    },
+    {
+      date: "Jun 12",
+      title: "Field Services Mobile pilot",
+      text: "Healthy program with strong chance of hitting target."
+    }
+  ],
+
+  highNotes: [
+    {
+      project: "Claims Modernization Platform",
+      date: "2026-04-20",
+      note: "Still the biggest concentration of work and leadership attention. Direction is clearer now, but dependency drag remains the main concern."
+    },
+    {
+      project: "Customer Portal Refresh",
+      date: "2026-04-21",
+      note: "Healthy and relatively predictable. This is a good candidate to finish cleanly and reduce portfolio load."
+    },
+    {
+      project: "Identity Access Refresh",
+      date: "2026-04-21",
+      note: "Small enough to feel manageable, but strategically sensitive enough that slippage would matter more than average."
+    },
+    {
+      project: "Reporting Warehouse",
+      date: "2026-04-18",
+      note: "Not yet top emergency level, but could become leadership-visible quickly if latency problems continue."
+    }
+  ]
+};
+
+function segmentedBar(metrics){
+  const total = metrics.total || 1;
+  const segments = [
+    ["new", Math.max(0, total - metrics.done - metrics.active - metrics.qa - metrics.blocked)],
+    ["progress", metrics.active],
+    ["qa", metrics.qa],
+    ["blocked", metrics.blocked],
+    ["done", metrics.done]
+  ];
+
+  return `
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        ${segments.map(([cls,val]) => {
+          const w = Math.max(0, (val / total) * 100);
+          return `<div class="seg-${cls}" style="width:${w}%"></div>`;
+        }).join("")}
+      </div>
+      <div class="progress-legend">
+        <span>${metrics.total.toLocaleString()} total</span>
+        <span>${metrics.active} active</span>
+        <span>${metrics.blocked} blocked</span>
+        <span>${metrics.donePercent}% done</span>
+      </div>
+    </div>
+  `;
 }
-];
 
-let selected = null;
+function renderCurrentWorkCard(item){
+  return `
+    <div class="work-card">
+      <div class="work-top">
+        <div>
+          <div class="work-name">${item.name}</div>
+          <div class="work-meta">${item.domain} • ${item.type} • Sponsor: ${item.sponsor}</div>
+        </div>
+        <div class="badges">
+          <span class="badge priority-${item.priority}">${item.priority}</span>
+          <span class="badge status-${item.status}">${item.status}</span>
+          <span class="badge">Urgency: ${item.urgency}</span>
+          <span class="badge">Risk: ${item.risk}</span>
+          <span class="badge">Confidence: ${item.confidence}</span>
+        </div>
+      </div>
 
-/* FILTERING */
-function getFiltered(){
-    const status = document.getElementById("statusFilter").value;
-    const team = document.getElementById("teamFilter").value;
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Target</div>
+          <div class="metric-value">${item.targetMilestone}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Business Value</div>
+          <div class="metric-value">${item.businessValue}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Open Bugs</div>
+          <div class="metric-value">${item.metrics.openBugs}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Blocked</div>
+          <div class="metric-value">${item.metrics.blocked}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Leads</div>
+          <div class="metric-value">${item.leads.join(", ")}</div>
+        </div>
+      </div>
 
-    return workItems.filter(w=>{
-        return (status === "ALL" || w.state === status) &&
-               (team === "ALL" || w.team === team);
-    });
+      ${segmentedBar(item.metrics)}
+
+      <div style="margin-top:12px; font-size:12px; color:#cbd5e1;">
+        <strong>Why now:</strong> ${item.whyNow}<br>
+        <strong>Expected outcome:</strong> ${item.expectedOutcome}
+      </div>
+
+      <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">
+        ${item.notes.map(n => `<div class="note"><div>${n}</div></div>`).join("")}
+      </div>
+    </div>
+  `;
 }
 
-/* LIST */
+function renderNextQueueCard(item){
+  return `
+    <div class="work-card">
+      <div class="work-top">
+        <div>
+          <div class="work-name">${item.name}</div>
+          <div class="work-meta">${item.domain} • ${item.type} • Sponsor: ${item.sponsor}</div>
+        </div>
+        <div class="badges">
+          <span class="badge priority-${item.priority}">${item.priority}</span>
+          <span class="badge">Urgency: ${item.urgency}</span>
+          <span class="badge">Effort: ${item.effort}</span>
+        </div>
+      </div>
+
+      <div style="margin-top:10px; font-size:12px; color:#cbd5e1;">
+        <strong>Likely start driver:</strong> ${item.reason}<br>
+        <strong>Expected outcome:</strong> ${item.expectedOutcome}<br>
+        <strong>Target milestone:</strong> ${item.targetMilestone}
+      </div>
+    </div>
+  `;
+}
+
+function renderRiskItem(item){
+  const severityClass = item.severity === "High" ? "status-Blocked" : "status-At Risk";
+  return `
+    <div class="mini-item">
+      <div>
+        <div class="mini-name">${item.name}</div>
+        <div class="mini-sub">${item.issue}</div>
+        <div class="mini-sub">${item.why}</div>
+      </div>
+      <div><span class="pill ${severityClass}">${item.severity}</span></div>
+    </div>
+  `;
+}
+
+function renderTimelineItem(item){
+  return `
+    <div class="timeline-item">
+      <div class="timeline-date">${item.date}</div>
+      <div class="timeline-card">
+        <div class="mini-name">${item.title}</div>
+        <div class="mini-sub">${item.text}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderHighNote(item){
+  return `
+    <div class="note">
+      <div class="note-top">
+        <div>${item.project}</div>
+        <div>${item.date}</div>
+      </div>
+      <div>${item.note}</div>
+    </div>
+  `;
+}
+
+function renderKPIs(){
+  const current = dashboardData.currentWork;
+  const totalActiveProjects = current.length;
+  const totalBlockedItems = current.reduce((sum, x) => sum + x.metrics.blocked, 0);
+  const totalActiveItems = current.reduce((sum, x) => sum + x.metrics.active, 0);
+  const totalOpenBugs = current.reduce((sum, x) => sum + x.metrics.openBugs, 0);
+  const atRiskCount = current.filter(x => x.status === "At Risk" || x.status === "Blocked").length;
+  const nextQueueCount = dashboardData.nextQueue.length;
+
+  const html = `
+    <div class="kpi">
+      <div class="kpi-label">Active Projects</div>
+      <div class="kpi-value">${totalActiveProjects}</div>
+      <div class="kpi-sub">Currently consuming delivery capacity</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Next Up</div>
+      <div class="kpi-value">${nextQueueCount}</div>
+      <div class="kpi-sub">Approved and waiting to enter active work</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Active Items</div>
+      <div class="kpi-value">${totalActiveItems}</div>
+      <div class="kpi-sub">Across current work streams</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Blocked Items</div>
+      <div class="kpi-value">${totalBlockedItems}</div>
+      <div class="kpi-sub">Things slowing forward movement</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Open Bugs</div>
+      <div class="kpi-value">${totalOpenBugs}</div>
+      <div class="kpi-sub">Across current active efforts</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Needs Attention</div>
+      <div class="kpi-value">${atRiskCount}</div>
+      <div class="kpi-sub">Projects currently at risk or blocked</div>
+    </div>
+  `;
+  document.getElementById("kpiRow").innerHTML = html;
+}
+
 function render(){
-    const list = document.getElementById("list");
-    list.innerHTML = "";
-
-    const items = getFiltered();
-
-    items.forEach(item=>{
-        const div = document.createElement("div");
-        div.className = "card";
-
-        div.innerHTML = `
-            <div class="title">${item.title}</div>
-            <div class="meta">${item.team} • ${item.type} • Assigned: ${item.assignedTo}</div>
-            <div class="status ${item.state.toLowerCase().replace(" ","")}">${item.state}</div>
-
-            <div class="progress">
-                <div class="bar" style="width:${item.progress}%"></div>
-            </div>
-        `;
-
-        div.onclick = ()=> showDetail(item);
-
-        list.appendChild(div);
-    });
-}
-
-/* DETAIL PANEL */
-function showDetail(item){
-    selected = item;
-
-    const detail = document.getElementById("detail");
-
-    detail.innerHTML = `
-        <h3>${item.title}</h3>
-        <div class="meta">Work Item #${item.id}</div>
-
-        <div class="section">
-            <h3>State</h3>
-            <span class="tag">${item.state}</span>
-            <span class="tag">${item.team}</span>
-            <span class="tag">${item.type}</span>
-        </div>
-
-        <div class="section">
-            <h3>Assignment</h3>
-            <div>${item.assignedTo}</div>
-        </div>
-
-        <div class="section">
-            <h3>Progress</h3>
-            <div>${item.progress}% complete</div>
-            <div class="progress">
-                <div class="bar" style="width:${item.progress}%"></div>
-            </div>
-            <div>Remaining Work: ${item.remainingWork} SP</div>
-        </div>
-
-        <div class="section">
-            <h3>Notes</h3>
-            <textarea style="width:100%;min-height:70px;background:#0b1220;color:white;border:1px solid #1e293b;border-radius:6px;padding:6px;">
-${item.notes}
-            </textarea>
-        </div>
-
-        <div class="section">
-            <h3>Linked ADO Work Items</h3>
-            ${item.linked.map(l=>`<div class="tag">${l}</div>`).join("")}
-        </div>
-
-        <div class="section">
-            <h3>History</h3>
-            ${item.history.map(h=>`<div>• ${h}</div>`).join("")}
-        </div>
-
-        <div class="section">
-            <button class="primary" onclick="simulateUpdate()">Simulate Progress</button>
-        </div>
-    `;
-}
-
-/* SIMULATED LIVE UPDATE */
-function simulateUpdate(){
-    if(!selected) return;
-
-    selected.progress = Math.min(100, selected.progress + 10);
-    selected.remainingWork = Math.max(0, selected.remainingWork - 1);
-
-    render();
-    showDetail(selected);
+  renderKPIs();
+  document.getElementById("currentWork").innerHTML = dashboardData.currentWork.map(renderCurrentWorkCard).join("");
+  document.getElementById("nextQueue").innerHTML = dashboardData.nextQueue.map(renderNextQueueCard).join("");
+  document.getElementById("riskList").innerHTML = dashboardData.risks.map(renderRiskItem).join("");
+  document.getElementById("timelineList").innerHTML = dashboardData.timelines.map(renderTimelineItem).join("");
+  document.getElementById("highNotes").innerHTML = dashboardData.highNotes.map(renderHighNote).join("");
 }
 
 render();
-
 </script>
-
 </body>
 </html>
