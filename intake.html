@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Intake Engine POC</title>
+<title>Dynamic Work Intake POC</title>
 
 <style>
 body {
@@ -13,9 +13,8 @@ body {
     color: #e2e8f0;
 }
 
-/* HEADER */
 .header {
-    padding: 14px 20px;
+    padding: 16px 20px;
     background: #020617;
     border-bottom: 1px solid #1e293b;
 }
@@ -25,14 +24,12 @@ body {
     font-size: 18px;
 }
 
-/* LAYOUT */
 .container {
-    max-width: 900px;
+    max-width: 980px;
     margin: auto;
     padding: 20px;
 }
 
-/* CARD */
 .card {
     background: #020617;
     border: 1px solid #1e293b;
@@ -41,52 +38,63 @@ body {
     margin-bottom: 16px;
 }
 
-/* SECTION TITLE */
 .section-title {
     font-size: 14px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     color: #94a3b8;
+    font-weight: 600;
 }
 
-/* INPUTS */
+label {
+    display: block;
+    font-size: 12px;
+    color: #cbd5e1;
+    margin-bottom: 4px;
+}
+
 input, textarea, select {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     margin-top: 4px;
     margin-bottom: 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid #1e293b;
-    background: #020617;
+    background: #0b1220;
     color: #e2e8f0;
+    box-sizing: border-box;
 }
 
 textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 84px;
 }
 
-/* ROW */
 .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
 
-/* BUTTON */
+.row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
 button {
     background: #2563eb;
     border: none;
     padding: 10px 14px;
     color: white;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
+    margin-right: 8px;
 }
 
 button.secondary {
     background: #1e293b;
 }
 
-/* SUMMARY PANEL */
 .summary {
     background: #020617;
     border: 1px solid #1e293b;
@@ -100,13 +108,32 @@ button.secondary {
 }
 
 .badge {
+    display: inline-block;
     background: #1e293b;
     padding: 4px 8px;
     margin-right: 6px;
-    border-radius: 6px;
+    margin-bottom: 6px;
+    border-radius: 999px;
     font-size: 11px;
+    color: #cbd5e1;
 }
 
+.helper {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: -8px;
+    margin-bottom: 10px;
+}
+
+.field-group {
+    border-top: 1px solid #1e293b;
+    padding-top: 14px;
+    margin-top: 6px;
+}
+
+.hidden {
+    display: none;
+}
 </style>
 </head>
 
@@ -119,102 +146,401 @@ button.secondary {
 <div class="container">
 
     <div class="card">
-        <div class="section-title">Request Details</div>
+        <div class="section-title">Base Request Information</div>
 
-        <label>Title</label>
+        <div class="row">
+            <div>
+                <label for="type">Request Type</label>
+                <select id="type" onchange="renderDynamicFields()">
+                    <option value="Bug">Bug</option>
+                    <option value="Feature">Feature</option>
+                    <option value="Enhancement">Enhancement</option>
+                    <option value="New Application">New Application</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="app">Application / System</label>
+                <input id="app" placeholder="System name or impacted application" />
+            </div>
+        </div>
+
+        <label for="title">Title</label>
         <input id="title" placeholder="Short, clear description" />
 
-        <label>Business Objective</label>
-        <textarea id="objective" placeholder="What problem are we solving?"></textarea>
+        <label for="objective">Business Objective / Why This Matters</label>
+        <textarea id="objective" placeholder="What problem are we solving, and why does it matter to the business?"></textarea>
 
-        <label>Requestor (True Origin)</label>
-        <input id="requestor" placeholder="Who is this really for?" />
+        <div class="row">
+            <div>
+                <label for="requestor">Requestor (True Origin)</label>
+                <input id="requestor" placeholder="Who is this really for?" />
+            </div>
+
+            <div>
+                <label for="submittedBy">Submitted By</label>
+                <input id="submittedBy" placeholder="BA, lead, office manager, etc." />
+            </div>
+        </div>
     </div>
 
     <div class="card">
-        <div class="section-title">Classification</div>
+        <div class="section-title">Triage-Helpful Classification</div>
 
-        <div class="row">
+        <div class="row-3">
             <div>
-                <label>Type</label>
-                <select id="type">
-                    <option>Bug</option>
-                    <option>Feature</option>
-                    <option>Enhancement</option>
-                    <option>Initiative</option>
-                </select>
-            </div>
-
-            <div>
-                <label>Application</label>
-                <input id="app" placeholder="System / App name" />
-            </div>
-        </div>
-
-        <div class="row">
-            <div>
-                <label>Urgency</label>
+                <label for="urgency">Urgency</label>
                 <select id="urgency">
-                    <option value="3">Low</option>
-                    <option value="6">Medium</option>
-                    <option value="9">High</option>
+                    <option>Low</option>
+                    <option selected>Medium</option>
+                    <option>High</option>
+                    <option>Critical</option>
                 </select>
             </div>
 
             <div>
-                <label>Impact</label>
+                <label for="impact">Business Impact</label>
                 <select id="impact">
-                    <option value="3">Low</option>
-                    <option value="6">Medium</option>
-                    <option value="9">High</option>
+                    <option>Low</option>
+                    <option selected>Medium</option>
+                    <option>High</option>
+                    <option>Severe</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="effortGuess">Initial Effort Guess</label>
+                <select id="effortGuess">
+                    <option>Unknown</option>
+                    <option>Small</option>
+                    <option selected>Medium</option>
+                    <option>Large</option>
+                    <option>Very Large</option>
                 </select>
             </div>
         </div>
+
+        <div class="row">
+            <div>
+                <label for="requestedByDate">Requested By / Target Timing</label>
+                <input id="requestedByDate" placeholder="Needed by next sprint, before release, this quarter, etc." />
+            </div>
+            <div>
+                <label for="workaround">Current Workaround</label>
+                <input id="workaround" placeholder="Is there a workaround today?" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-title">Type-Specific Intake</div>
+        <div id="dynamicFields"></div>
     </div>
 
     <div class="card">
         <div class="section-title">Actions</div>
-        <button onclick="submitRequest()">Submit Request</button>
+        <button onclick="submitRequest()">Preview Intake</button>
         <button class="secondary" onclick="clearForm()">Clear</button>
     </div>
 
-    <div class="summary" id="summary" style="display:none;">
-        <h3>Preview</h3>
+    <div class="summary hidden" id="summary">
+        <h3>Intake Preview</h3>
         <div id="previewContent"></div>
     </div>
 
 </div>
 
 <script>
-function submitRequest(){
-    const title = document.getElementById("title").value;
-    const objective = document.getElementById("objective").value;
-    const requestor = document.getElementById("requestor").value;
+const dynamicTemplates = {
+    "Bug": `
+        <div class="row">
+            <div>
+                <label for="bugUrl">Bug URL / Page / Screen</label>
+                <input id="bugUrl" placeholder="Exact page, route, or screen where the bug occurs" />
+            </div>
+            <div>
+                <label for="environment">Environment</label>
+                <select id="environment">
+                    <option>Production</option>
+                    <option>QA</option>
+                    <option>UAT</option>
+                    <option>Development</option>
+                    <option>Unknown</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label for="severity">Severity</label>
+                <select id="severity">
+                    <option>Low</option>
+                    <option>Medium</option>
+                    <option>High</option>
+                    <option>Critical</option>
+                </select>
+            </div>
+            <div>
+                <label for="frequency">Frequency</label>
+                <select id="frequency">
+                    <option>Always</option>
+                    <option>Often</option>
+                    <option>Sometimes</option>
+                    <option>Rarely</option>
+                    <option>Unknown</option>
+                </select>
+            </div>
+        </div>
+
+        <label for="howToReplicate">How to Replicate</label>
+        <textarea id="howToReplicate" placeholder="Step 1, Step 2, Step 3..."></textarea>
+
+        <div class="row">
+            <div>
+                <label for="expectedBehavior">Expected Behavior</label>
+                <textarea id="expectedBehavior" placeholder="What should happen?"></textarea>
+            </div>
+            <div>
+                <label for="actualBehavior">Actual Behavior</label>
+                <textarea id="actualBehavior" placeholder="What actually happens?"></textarea>
+            </div>
+        </div>
+
+        <label for="affectedUsers">Who Is Affected?</label>
+        <input id="affectedUsers" placeholder="All users, admins only, one customer, internal team, etc." />
+    `,
+
+    "Feature": `
+        <label for="userProblem">User / Business Problem</label>
+        <textarea id="userProblem" placeholder="What pain point or opportunity is driving this feature?"></textarea>
+
+        <div class="row">
+            <div>
+                <label for="targetUsers">Target Users</label>
+                <input id="targetUsers" placeholder="Who will use this feature?" />
+            </div>
+            <div>
+                <label for="expectedOutcome">Desired Outcome</label>
+                <input id="expectedOutcome" placeholder="What should be better after this exists?" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label for="featureTiming">Why Now?</label>
+                <input id="featureTiming" placeholder="What makes this important right now?" />
+            </div>
+            <div>
+                <label for="successMeasure">How Will Success Be Judged?</label>
+                <input id="successMeasure" placeholder="Adoption, reduced manual work, faster processing, etc." />
+            </div>
+        </div>
+
+        <label for="featureScope">High-Level Requested Capability</label>
+        <textarea id="featureScope" placeholder="Describe what the feature should do at a high level."></textarea>
+    `,
+
+    "Enhancement": `
+        <label for="currentState">Current State / Existing Behavior</label>
+        <textarea id="currentState" placeholder="How does it work today?"></textarea>
+
+        <label for="painPoint">Pain Point with Current Approach</label>
+        <textarea id="painPoint" placeholder="What is frustrating, slow, confusing, or inefficient now?"></textarea>
+
+        <div class="row">
+            <div>
+                <label for="proposedImprovement">Requested Improvement</label>
+                <input id="proposedImprovement" placeholder="What would make this better?" />
+            </div>
+            <div>
+                <label for="scopeAffected">What Area Is Affected?</label>
+                <input id="scopeAffected" placeholder="Workflow, screen, report, integration, etc." />
+            </div>
+        </div>
+
+        <label for="benefit">Expected Benefit</label>
+        <textarea id="benefit" placeholder="What improvement should this create?"></textarea>
+    `,
+
+    "New Application": `
+        <label for="businessGoal">Business Goal for the New Application</label>
+        <textarea id="businessGoal" placeholder="What business capability should this new application provide?"></textarea>
+
+        <div class="row">
+            <div>
+                <label for="primaryUsers">Primary Users</label>
+                <input id="primaryUsers" placeholder="Who will use this application?" />
+            </div>
+            <div>
+                <label for="executiveSponsor">Sponsor / Owning Group</label>
+                <input id="executiveSponsor" placeholder="Who is sponsoring or owning this effort?" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label for="replacesExisting">Does it Replace Something Existing?</label>
+                <select id="replacesExisting">
+                    <option>No</option>
+                    <option>Yes</option>
+                    <option>Partially</option>
+                    <option>Unknown</option>
+                </select>
+            </div>
+            <div>
+                <label for="integrationNeeds">Integration Needs</label>
+                <input id="integrationNeeds" placeholder="ADO, CRM, database, APIs, email, identity, etc." />
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label for="roughSize">Rough Size / Complexity</label>
+                <select id="roughSize">
+                    <option>Small</option>
+                    <option>Medium</option>
+                    <option>Large</option>
+                    <option>Very Large</option>
+                    <option>Unknown</option>
+                </select>
+            </div>
+            <div>
+                <label for="timelinePressure">Timeline Pressure</label>
+                <input id="timelinePressure" placeholder="Regulatory, customer need, internal deadline, etc." />
+            </div>
+        </div>
+
+        <label for="appCapabilities">Core Capabilities Needed</label>
+        <textarea id="appCapabilities" placeholder="List the main things this application must do."></textarea>
+
+        <label for="nonFunctionalNeeds">Non-Functional Needs</label>
+        <textarea id="nonFunctionalNeeds" placeholder="Security, reporting, availability, audit trail, user roles, performance, etc."></textarea>
+    `
+};
+
+function renderDynamicFields() {
     const type = document.getElementById("type").value;
-    const app = document.getElementById("app").value;
-    const urgency = document.getElementById("urgency").value;
-    const impact = document.getElementById("impact").value;
+    document.getElementById("dynamicFields").innerHTML = dynamicTemplates[type] || "";
+}
+
+function getValue(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : "";
+}
+
+function submitRequest() {
+    const type = getValue("type");
+    const title = getValue("title");
+    const objective = getValue("objective");
+    const app = getValue("app");
+    const requestor = getValue("requestor");
+    const submittedBy = getValue("submittedBy");
+    const urgency = getValue("urgency");
+    const impact = getValue("impact");
+    const effortGuess = getValue("effortGuess");
+    const requestedByDate = getValue("requestedByDate");
+    const workaround = getValue("workaround");
+
+    let typeSpecificHtml = "";
+
+    if (type === "Bug") {
+        typeSpecificHtml = `
+            <h4>Bug Detail</h4>
+            <p><strong>URL / Screen:</strong> ${escapeHtml(getValue("bugUrl")) || "—"}</p>
+            <p><strong>Environment:</strong> ${escapeHtml(getValue("environment")) || "—"}</p>
+            <p><strong>Severity:</strong> ${escapeHtml(getValue("severity")) || "—"}</p>
+            <p><strong>Frequency:</strong> ${escapeHtml(getValue("frequency")) || "—"}</p>
+            <p><strong>Affected Users:</strong> ${escapeHtml(getValue("affectedUsers")) || "—"}</p>
+            <p><strong>How to Replicate:</strong><br>${formatMultiline(getValue("howToReplicate")) || "—"}</p>
+            <p><strong>Expected Behavior:</strong><br>${formatMultiline(getValue("expectedBehavior")) || "—"}</p>
+            <p><strong>Actual Behavior:</strong><br>${formatMultiline(getValue("actualBehavior")) || "—"}</p>
+        `;
+    } else if (type === "Feature") {
+        typeSpecificHtml = `
+            <h4>Feature Detail</h4>
+            <p><strong>User / Business Problem:</strong><br>${formatMultiline(getValue("userProblem")) || "—"}</p>
+            <p><strong>Target Users:</strong> ${escapeHtml(getValue("targetUsers")) || "—"}</p>
+            <p><strong>Desired Outcome:</strong> ${escapeHtml(getValue("expectedOutcome")) || "—"}</p>
+            <p><strong>Why Now:</strong> ${escapeHtml(getValue("featureTiming")) || "—"}</p>
+            <p><strong>Success Measure:</strong> ${escapeHtml(getValue("successMeasure")) || "—"}</p>
+            <p><strong>Requested Capability:</strong><br>${formatMultiline(getValue("featureScope")) || "—"}</p>
+        `;
+    } else if (type === "Enhancement") {
+        typeSpecificHtml = `
+            <h4>Enhancement Detail</h4>
+            <p><strong>Current State:</strong><br>${formatMultiline(getValue("currentState")) || "—"}</p>
+            <p><strong>Pain Point:</strong><br>${formatMultiline(getValue("painPoint")) || "—"}</p>
+            <p><strong>Requested Improvement:</strong> ${escapeHtml(getValue("proposedImprovement")) || "—"}</p>
+            <p><strong>Affected Area:</strong> ${escapeHtml(getValue("scopeAffected")) || "—"}</p>
+            <p><strong>Expected Benefit:</strong><br>${formatMultiline(getValue("benefit")) || "—"}</p>
+        `;
+    } else if (type === "New Application") {
+        typeSpecificHtml = `
+            <h4>New Application Detail</h4>
+            <p><strong>Business Goal:</strong><br>${formatMultiline(getValue("businessGoal")) || "—"}</p>
+            <p><strong>Primary Users:</strong> ${escapeHtml(getValue("primaryUsers")) || "—"}</p>
+            <p><strong>Sponsor / Owning Group:</strong> ${escapeHtml(getValue("executiveSponsor")) || "—"}</p>
+            <p><strong>Replaces Existing:</strong> ${escapeHtml(getValue("replacesExisting")) || "—"}</p>
+            <p><strong>Integration Needs:</strong> ${escapeHtml(getValue("integrationNeeds")) || "—"}</p>
+            <p><strong>Rough Size:</strong> ${escapeHtml(getValue("roughSize")) || "—"}</p>
+            <p><strong>Timeline Pressure:</strong> ${escapeHtml(getValue("timelinePressure")) || "—"}</p>
+            <p><strong>Core Capabilities:</strong><br>${formatMultiline(getValue("appCapabilities")) || "—"}</p>
+            <p><strong>Non-Functional Needs:</strong><br>${formatMultiline(getValue("nonFunctionalNeeds")) || "—"}</p>
+        `;
+    }
 
     const preview = `
-        <strong>${title}</strong><br/><br/>
-        ${objective}<br/><br/>
+        <p><strong>${escapeHtml(title) || "Untitled Request"}</strong></p>
+        <div>
+            <span class="badge">${escapeHtml(type)}</span>
+            <span class="badge">${escapeHtml(app) || "No App Provided"}</span>
+            <span class="badge">Urgency: ${escapeHtml(urgency)}</span>
+            <span class="badge">Impact: ${escapeHtml(impact)}</span>
+            <span class="badge">Effort Guess: ${escapeHtml(effortGuess)}</span>
+        </div>
 
-        <span class="badge">${type}</span>
-        <span class="badge">${app}</span>
-        <span class="badge">Urgency ${urgency}</span>
-        <span class="badge">Impact ${impact}</span>
-        <br/><br/>
-        <em>Requested by: ${requestor}</em>
+        <p><strong>Business Objective:</strong><br>${formatMultiline(objective) || "—"}</p>
+        <p><strong>Requestor:</strong> ${escapeHtml(requestor) || "—"}</p>
+        <p><strong>Submitted By:</strong> ${escapeHtml(submittedBy) || "—"}</p>
+        <p><strong>Target Timing:</strong> ${escapeHtml(requestedByDate) || "—"}</p>
+        <p><strong>Current Workaround:</strong> ${escapeHtml(workaround) || "—"}</p>
+
+        ${typeSpecificHtml}
     `;
 
     document.getElementById("previewContent").innerHTML = preview;
-    document.getElementById("summary").style.display = "block";
+    document.getElementById("summary").classList.remove("hidden");
 }
 
-function clearForm(){
+function clearForm() {
     document.querySelectorAll("input, textarea").forEach(el => el.value = "");
-    document.getElementById("summary").style.display = "none";
+    document.querySelectorAll("select").forEach(el => {
+        if (el.id === "type") {
+            el.value = "Bug";
+        } else {
+            el.selectedIndex = 0;
+        }
+    });
+    renderDynamicFields();
+    document.getElementById("summary").classList.add("hidden");
+    document.getElementById("previewContent").innerHTML = "";
 }
+
+function escapeHtml(value) {
+    return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
+function formatMultiline(value) {
+    if (!value) return "";
+    return escapeHtml(value).replace(/\n/g, "<br>");
+}
+
+renderDynamicFields();
 </script>
 
 </body>
