@@ -109,6 +109,33 @@ a:hover { text-decoration:underline; }
 .seg-blocked { background:var(--red); }
 .seg-done { background:var(--green); }
 .percent { font-size:11px; color:#cbd5e1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar-legend {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  padding-top:10px;
+}
+
+.legend-item {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  color:#cbd5e1;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:6px 10px;
+}
+
+.legend-swatch {
+  width:12px;
+  height:12px;
+  border-radius:999px;
+  display:inline-block;
+  flex:0 0 auto;
+}
 .link-cluster { display:flex; gap:6px; flex-wrap:wrap; }
 .link-btn {
   display:inline-block; padding:5px 8px; border-radius:8px; background:#13213e; border:1px solid var(--border); font-size:11px;
@@ -206,7 +233,17 @@ a:hover { text-decoration:underline; }
     </select>
     <button id="resetBtn">Reset</button>
   </div>
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
   <div class="statsbar" id="statsbar"></div>
+
+  <div class="bar-legend" id="barLegend">
+    <span class="legend-item"><span class="legend-swatch seg-new"></span>New</span>
+    <span class="legend-item"><span class="legend-swatch seg-progress"></span>In Progress</span>
+    <span class="legend-item"><span class="legend-swatch seg-qa"></span>QA</span>
+    <span class="legend-item"><span class="legend-swatch seg-blocked"></span>Blocked</span>
+    <span class="legend-item"><span class="legend-swatch seg-done"></span>Done</span>
+  </div>
+</div>
 </div>
 
 <div class="layout">
