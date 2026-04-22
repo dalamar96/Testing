@@ -216,12 +216,12 @@ a:hover { text-decoration:underline; }
         <div>Project</div>
         <div>Type</div>
         <div>Status</div>
-        <div>Priority</div>
+        <div>Done %</div>
         <div>Urgency</div>
         <div class="hide-md">Leads</div>
         <div class="hide-md">Updated</div>
         <div class="hide-md">Open Work</div>
-        <div class="hide-md">Done %</div>
+        <div class="hide-md">Priority</div>
         <div class="hide-md">Blocked</div>
         <div>ADO</div>
       </div>
@@ -310,7 +310,7 @@ function segmentedBar(metrics) {
       <div class="progress-bar">
         ${parts.map(([cls,val]) => {
           const w = Math.max(0, (val/total)*100);
-          return `<div class="seg-${cls}" style="width:${w}%"></div>`;
+          return `<div title="${cls}" class="seg-${cls}" style="width:${w}%"></div>`;
         }).join("")}
       </div>
       <div class="percent">${metrics.donePercent}% done</div>
@@ -333,12 +333,12 @@ function renderRows() {
       </div>
       <div><span class="pill type-chip-${p.type}">${p.type}</span></div>
       <div><span class="mini status-${p.status}">${p.status}</span></div>
-      <div><span class="mini">${p.priority}</span></div>
+      <div><span class="mini">${segmentedBar(p.metrics)}</span></div>
       <div><span class="mini">${p.urgency}</span></div>
       <div class="hide-md"><span class="mini">${p.leads.join(", ")}</span></div>
       <div class="hide-md"><span class="mini">${fmtDate(p.updated)}</span></div>
       <div class="hide-md"><span class="mini">${p.metrics.active} active</span></div>
-      <div class="hide-md">${segmentedBar(p.metrics)}</div>
+      <div class="hide-md">${p.priority}</div>
       <div class="hide-md"><span class="mini">${p.metrics.blocked}</span></div>
       <div><a class="link-btn" href="${p.adoLinks.project}" onclick="event.stopPropagation()">Open</a></div>
     </div>
