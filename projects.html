@@ -3,368 +3,510 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Projects Portfolio</title>
-
+<title>Projects Portfolio Dashboard POC</title>
 <style>
-:root{
-  --bg:#0b1220;
-  --panel:#020617;
-  --panel2:#0f172a;
-  --border:#1e293b;
-  --text:#e2e8f0;
-  --muted:#94a3b8;
-  --green:#4ade80;
-  --yellow:#facc15;
-  --red:#f87171;
-  --blue:#60a5fa;
+:root {
+  --bg:#0b1220; --panel:#020617; --panel2:#0f172a; --border:#1e293b; --text:#e2e8f0; --muted:#94a3b8;
+  --blue:#60a5fa; --yellow:#facc15; --green:#4ade80; --red:#f87171; --violet:#a78bfa;
 }
-
-*{ box-sizing:border-box; }
-
-body{
-  margin:0;
-  font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background:var(--bg);
-  color:var(--text);
+* { box-sizing:border-box; }
+body {
+  margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text);
 }
-
-.header{
-  padding:14px 16px;
-  border-bottom:1px solid var(--border);
-  position:sticky;
-  top:0;
-  z-index:30;
-  background:var(--panel);
+a { color:#93c5fd; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.header {
+  position:sticky; top:0; z-index:50; background:rgba(2,6,23,.96); backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--border); padding:12px 16px;
 }
-
-.header h2{
-  margin:0;
-  font-size:18px;
+.header-top {
+  display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px;
 }
-
-.container{
+.header h1 { margin:0; font-size:18px; }
+.subtle { color:var(--muted); font-size:12px; }
+.toolbar {
+  display:grid; grid-template-columns:1.2fr repeat(6, minmax(120px, 1fr)); gap:8px;
+}
+.toolbar input, .toolbar select, .toolbar button {
+  width:100%; padding:9px 10px; border-radius:8px; border:1px solid var(--border); background:var(--panel2); color:var(--text);
+}
+.toolbar button { cursor:pointer; background:#1d4ed8; border-color:#1d4ed8; }
+.statsbar {
+  display:flex; gap:10px; flex-wrap:wrap; padding-top:10px;
+}
+.stat {
+  background:var(--panel2); border:1px solid var(--border); border-radius:999px; padding:6px 10px; font-size:11px; color:#cbd5e1;
+}
+.layout {
+  display:grid; grid-template-columns:minmax(780px,1fr) 420px; gap:14px; padding:14px; max-width:1680px; margin:auto;
+}
+.table-panel, .drawer {
+  background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden;
+}
+.table-scroll {
+  max-height:calc(100vh - 190px); overflow:auto;
+}
+.table-header, .row {
   display:grid;
-  grid-template-columns:minmax(0, 1fr) 400px;
-  gap:12px;
-  padding:12px;
-  max-width:1500px;
-  margin:auto;
-}
-
-.table-wrap{
-  border:1px solid var(--border);
-  border-radius:10px;
-  overflow:hidden;
-  background:var(--panel);
-  min-width:0;
-}
-
-.table-scroll{
-  max-height:calc(100vh - 100px);
-  overflow:auto;
-}
-
-/* IMPORTANT: header and rows share EXACTLY the same columns */
-.grid-header,
-.row{
-  display:grid;
-  grid-template-columns: minmax(240px, 2.2fr) 110px 90px 100px 100px 110px;
-  gap:12px;
+  grid-template-columns:
+    minmax(260px, 2.5fr)
+    120px
+    100px
+    90px
+    110px
+    140px
+    110px
+    120px
+    160px
+    90px
+    90px;
+  gap:10px;
   align-items:center;
 }
-
-/* IMPORTANT: keep header in same scroll area */
-.grid-header{
-  position:sticky;
-  top:0;
-  z-index:5;
-  background:#0f172a;
-  border-bottom:1px solid var(--border);
-  padding:10px 12px;
-  font-size:11px;
-  color:var(--muted);
-  text-transform:uppercase;
-  letter-spacing:.04em;
+.table-header {
+  position:sticky; top:0; z-index:10; background:#0a1325; border-bottom:1px solid var(--border);
+  padding:10px 12px; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em;
 }
-
-/* IMPORTANT: min-width:0 lets content shrink instead of breaking alignment */
-.grid-header > div,
-.row > div{
-  min-width:0;
+.table-header > div, .row > div { min-width:0; }
+.row {
+  padding:12px; border-bottom:1px solid var(--border); cursor:pointer;
 }
-
-.row{
-  padding:12px;
-  border-bottom:1px solid var(--border);
-  cursor:pointer;
+.row:hover { background:#0b152a; }
+.row.selected { background:#0c1832; }
+.project-cell { min-width:0; }
+.project-title-wrap { display:flex; align-items:center; gap:8px; min-width:0; }
+.project-name {
+  font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-
-.row:hover{
-  background:#111c31;
+.project-meta {
+  font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px;
 }
-
-.row.selected{
-  background:#16233f;
+.pill {
+  display:inline-flex; align-items:center; gap:6px; padding:3px 8px; border-radius:999px; font-size:11px;
+  border:1px solid var(--border); background:var(--panel2); color:#cbd5e1; white-space:nowrap;
 }
-
-.project-cell{
-  min-width:0;
+.type-chip-New\ Application { border-color:#2563eb; color:#93c5fd; }
+.type-chip-Enhancement { border-color:#7c3aed; color:#c4b5fd; }
+.type-chip-Bug\ Fix { border-color:#b91c1c; color:#fca5a5; }
+.type-chip-Mixed { border-color:#0f766e; color:#67e8f9; }
+.status-Healthy { color:var(--green); }
+.status-At\ Risk { color:var(--yellow); }
+.status-Blocked { color:var(--red); }
+.priority-P1 { color:#fca5a5; }
+.priority-P2 { color:#fde68a; }
+.priority-P3 { color:#93c5fd; }
+.priority-P4 { color:#cbd5e1; }
+.mini {
+  font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-
-.project-name{
-  font-weight:700;
-  font-size:14px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+.progress-stack { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.progress-bar {
+  height:9px; background:#111c31; border-radius:999px; overflow:hidden; border:1px solid var(--border); display:flex;
 }
-
-.project-meta{
-  margin-top:3px;
-  font-size:11px;
-  color:var(--muted);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+.seg-new { background:var(--blue); }
+.seg-progress { background:var(--yellow); }
+.seg-qa { background:var(--violet); }
+.seg-blocked { background:var(--red); }
+.seg-done { background:var(--green); }
+.percent { font-size:11px; color:#cbd5e1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.link-cluster { display:flex; gap:6px; flex-wrap:wrap; }
+.link-btn {
+  display:inline-block; padding:5px 8px; border-radius:8px; background:#13213e; border:1px solid var(--border); font-size:11px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-
-.cell-text{
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  font-size:12px;
+.drawer {
+  position:sticky; top:132px; max-height:calc(100vh - 146px); overflow:auto;
 }
-
-.status-Healthy{ color:var(--green); }
-.status-AtRisk{ color:var(--yellow); }
-.status-Blocked{ color:var(--red); }
-
-.pill{
-  display:inline-block;
-  padding:3px 8px;
-  border:1px solid var(--border);
-  border-radius:999px;
-  background:var(--panel2);
-  font-size:11px;
-  white-space:nowrap;
+.drawer-inner { padding:14px; }
+.drawer-empty { color:var(--muted); font-size:13px; padding:22px 16px; }
+.drawer h2 { margin:0 0 4px 0; font-size:18px; }
+.section {
+  margin-top:14px; background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:12px;
 }
-
-.progress-wrap{
-  min-width:0;
+.section h3 {
+  margin:0 0 10px 0; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em;
 }
-
-.percent{
-  font-size:11px;
-  color:var(--muted);
-  margin-bottom:4px;
+.kpi-grid {
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;
 }
-
-.bar{
-  height:8px;
-  background:#1e293b;
-  border-radius:999px;
-  overflow:hidden;
+.kpi {
+  background:#0b152a; border:1px solid var(--border); border-radius:8px; padding:8px;
 }
-
-.fill{
-  height:100%;
-  background:var(--green);
+.kpi .label { font-size:11px; color:var(--muted); }
+.kpi .value { font-size:16px; font-weight:700; margin-top:4px; }
+.details-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:8px;
 }
-
-.drawer{
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--panel);
-  padding:12px;
-  min-height:300px;
+.detail-line { font-size:12px; color:#cbd5e1; }
+.owner-group { margin-bottom:8px; }
+.owner-title { font-size:11px; color:var(--muted); margin-bottom:4px; }
+.person {
+  display:inline-block; margin:2px 4px 0 0; padding:3px 7px; border-radius:999px; font-size:11px; background:#13213e; border:1px solid var(--border);
 }
-
-.drawer h3{
-  margin-top:0;
+.breakdown {
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;
 }
-
-.note{
-  padding:8px 0;
-  border-bottom:1px solid var(--border);
-  font-size:12px;
+.break-card {
+  background:#0b152a; border:1px solid var(--border); border-radius:8px; padding:8px;
 }
+.break-card h4 { margin:0 0 8px 0; font-size:12px; }
+.break-row {
+  display:flex; justify-content:space-between; font-size:11px; margin:3px 0; color:#cbd5e1;
+}
+.notes { display:flex; flex-direction:column; gap:8px; }
+.note {
+  border-left:3px solid #2563eb; background:#0b152a; border:1px solid var(--border); border-left-width:3px;
+  border-radius:8px; padding:8px 10px;
+}
+.note-top {
+  display:flex; justify-content:space-between; gap:10px; margin-bottom:4px; font-size:11px;
+}
+.note-type { color:#93c5fd; font-weight:700; }
+.timeline { display:flex; flex-direction:column; gap:8px; }
+.tl-item { display:grid; grid-template-columns:110px 1fr; gap:10px; font-size:12px; }
+.tl-date { color:var(--muted); }
+.muted { color:var(--muted); }
 
-@media (max-width: 1100px){
-  .container{
-    grid-template-columns:1fr;
+@media (max-width: 1280px) {
+  .layout { grid-template-columns:1fr; }
+  .drawer { position:relative; top:0; max-height:none; }
+}
+@media (max-width: 980px) {
+  .toolbar { grid-template-columns:1fr 1fr; }
+  .table-header, .row {
+    grid-template-columns:minmax(220px, 2fr) 110px 100px 90px 120px 90px;
   }
-
-  .drawer{
-    order:-1;
-  }
+  .hide-md { display:none; }
+  .kpi-grid, .breakdown { grid-template-columns:1fr 1fr; }
 }
 </style>
 </head>
 <body>
-
 <div class="header">
-  <h2>Project Portfolio</h2>
+  <div class="header-top">
+    <div>
+      <h1>Projects Portfolio</h1>
+      <div class="subtle">Dense portfolio scan view with aligned grid columns, detail drawer, and embedded example data</div>
+    </div>
+    <div class="subtle" id="portfolioSummary"></div>
+  </div>
+  <div class="toolbar">
+    <input id="searchInput" type="text" placeholder="Search project name, lead, domain, sponsor..." />
+    <select id="statusFilter"><option value="ALL">All Status</option><option>Healthy</option><option>At Risk</option><option>Blocked</option></select>
+    <select id="typeFilter"><option value="ALL">All Work Types</option><option>New Application</option><option>Enhancement</option><option>Bug Fix</option><option>Mixed</option></select>
+    <select id="priorityFilter"><option value="ALL">All Priority</option><option>P1</option><option>P2</option><option>P3</option><option>P4</option></select>
+    <select id="ownerFilter"><option value="ALL">All Leads</option></select>
+    <select id="sortBy">
+      <option value="priority">Sort: Priority</option>
+      <option value="updated">Sort: Last Updated</option>
+      <option value="donePercent">Sort: Done %</option>
+      <option value="blocked">Sort: Blocked Count</option>
+      <option value="openBugs">Sort: Open Bugs</option>
+      <option value="active">Sort: Active Work</option>
+    </select>
+    <button id="resetBtn">Reset</button>
+  </div>
+  <div class="statsbar" id="statsbar"></div>
 </div>
 
-<div class="container">
-  <div class="table-wrap">
+<div class="layout">
+  <div class="table-panel">
     <div class="table-scroll">
-      <div class="grid-header">
+      <div class="table-header">
         <div>Project</div>
+        <div>Type</div>
         <div>Status</div>
         <div>Priority</div>
         <div>Urgency</div>
-        <div>Updated</div>
-        <div>Done %</div>
+        <div class="hide-md">Leads</div>
+        <div class="hide-md">Updated</div>
+        <div class="hide-md">Open Work</div>
+        <div class="hide-md">Done %</div>
+        <div class="hide-md">Blocked</div>
+        <div>ADO</div>
       </div>
-
       <div id="rows"></div>
     </div>
   </div>
-
   <div class="drawer" id="drawer">
-    Select a project
+    <div class="drawer-empty">Select a project to inspect its ADO summary, triage context, ownership, notes, timeline, and direct links.</div>
   </div>
 </div>
 
 <script>
-const projects = [
-  {
-    id:1,
-    name:"Claims Modernization Platform",
-    domain:"Claims / Core",
-    status:"At Risk",
-    priority:"P1",
-    urgency:"High",
-    updated:"2026-04-20",
-    metrics:{ total:2143, done:1458, active:312, blocked:41 },
-    notes:[
-      { dt:"2026-04-20 14:52", text:"Scope split into phases." },
-      { dt:"2026-04-18 09:22", text:"DB changes blocking progress." }
-    ]
-  },
-  {
-    id:2,
-    name:"Customer Portal Refresh",
-    domain:"Customer Experience",
-    status:"Healthy",
-    priority:"P2",
-    urgency:"Medium",
-    updated:"2026-04-21",
-    metrics:{ total:284, done:228, active:39, blocked:4 },
-    notes:[
-      { dt:"2026-04-21 08:11", text:"Feature finalized." },
-      { dt:"2026-04-20 15:44", text:"Bug fix deployed." }
-    ]
-  },
-  {
-    id:3,
-    name:"Payments Reliability and Gateway Retry Stabilization Workstream",
-    domain:"Checkout",
-    status:"Blocked",
-    priority:"P1",
-    urgency:"High",
-    updated:"2026-04-19",
-    metrics:{ total:97, done:67, active:21, blocked:9 },
-    notes:[
-      { dt:"2026-04-19 17:03", text:"Gateway issue." },
-      { dt:"2026-04-18 11:14", text:"Retry logic failure." }
-    ]
+const projects = [{'id': 1, 'name': 'Claims Modernization Platform', 'domain': 'Claims / Core', 'type': 'New Application', 'status': 'At Risk', 'priority': 'P1', 'urgency': 'Critical', 'effort': 'Very Large', 'risk': 'High', 'sponsor': 'Claims Operations', 'created': '2025-07-14', 'updated': '2026-04-20', 'leads': ['Alex', 'Jordan'], 'owners': {'dev': ['Alex', 'Jordan'], 'dba': ['Sam', 'Priya'], 'ba': ['Morgan'], 'tester': ['Jamie']}, 'metrics': {'total': 2143, 'active': 312, 'blocked': 41, 'qa': 62, 'done': 1458, 'openBugs': 27, 'donePercent': 68}, 'workBreakdown': {'epics': {'total': 21, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 14}, 'features': {'total': 129, 'new': 11, 'progress': 18, 'qa': 6, 'blocked': 6, 'done': 88}, 'bugs': {'total': 118, 'new': 10, 'progress': 17, 'qa': 6, 'blocked': 5, 'done': 80}, 'tasks': {'total': 1875, 'new': 143, 'progress': 270, 'qa': 90, 'blocked': 96, 'done': 1276}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 16:03', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-18 11:03', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-19 11:03', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-19', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-15', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 2, 'name': 'Customer Portal Refresh', 'domain': 'Customer Experience', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Large', 'risk': 'Medium', 'sponsor': 'Digital Experience', 'created': '2025-10-02', 'updated': '2026-04-21', 'leads': ['Morgan'], 'owners': {'dev': ['Morgan', 'Jamie'], 'dba': ['Sam', 'Priya'], 'ba': ['Jordan'], 'tester': ['Taylor', 'Jamie']}, 'metrics': {'total': 284, 'active': 39, 'blocked': 4, 'qa': 7, 'done': 228, 'openBugs': 6, 'donePercent': 80}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 17, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 14}, 'bugs': {'total': 37, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 30}, 'tasks': {'total': 227, 'new': 11, 'progress': 20, 'qa': 7, 'blocked': 7, 'done': 182}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 12:34', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-18 17:42', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 09:34', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-17', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-16', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-14', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 3, 'name': 'Payments Reliability and Gateway Retry Stabilization Workstream', 'domain': 'Checkout', 'type': 'Bug Fix', 'status': 'Blocked', 'priority': 'P1', 'urgency': 'High', 'effort': 'Medium', 'risk': 'High', 'sponsor': 'Revenue Systems', 'created': '2026-01-12', 'updated': '2026-04-19', 'leads': ['Taylor'], 'owners': {'dev': ['Taylor', 'Jordan'], 'dba': ['Priya', 'Sam'], 'ba': ['Casey', 'Jordan'], 'tester': ['Jamie']}, 'metrics': {'total': 97, 'active': 21, 'blocked': 9, 'qa': 4, 'done': 67, 'openBugs': 18, 'donePercent': 69}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 6, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 4}, 'bugs': {'total': 19, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 13}, 'tasks': {'total': 70, 'new': 5, 'progress': 10, 'qa': 3, 'blocked': 4, 'done': 48}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 17:03', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-20 13:11', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-17 09:51', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-16 13:34', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Project status reviewed and kept at Blocked.'}, {'dt': '2026-04-19', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-16', 'text': 'Project status reviewed and kept at Blocked.'}, {'dt': '2026-04-15', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 4, 'name': 'Field Services Mobile', 'domain': 'Mobile', 'type': 'New Application', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'High', 'effort': 'Large', 'risk': 'Medium', 'sponsor': 'Operations', 'created': '2025-11-23', 'updated': '2026-04-20', 'leads': ['Casey'], 'owners': {'dev': ['Casey'], 'dba': ['Sam'], 'ba': ['Casey'], 'tester': ['Jamie']}, 'metrics': {'total': 411, 'active': 58, 'blocked': 5, 'qa': 10, 'done': 318, 'openBugs': 9, 'donePercent': 77}, 'workBreakdown': {'epics': {'total': 4, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 3}, 'features': {'total': 25, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 19}, 'bugs': {'total': 37, 'new': 2, 'progress': 4, 'qa': 1, 'blocked': 1, 'done': 29}, 'tasks': {'total': 345, 'new': 19, 'progress': 35, 'qa': 12, 'blocked': 12, 'done': 267}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 11:27', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-20 15:27', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-18 16:18', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-19', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 5, 'name': 'Reporting Warehouse', 'domain': 'BI / Data', 'type': 'Enhancement', 'status': 'At Risk', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Large', 'risk': 'High', 'sponsor': 'Executive Reporting', 'created': '2025-09-06', 'updated': '2026-04-18', 'leads': ['Sam'], 'owners': {'dev': ['Sam'], 'dba': ['Priya', 'Sam'], 'ba': ['Jordan'], 'tester': ['Jamie']}, 'metrics': {'total': 563, 'active': 88, 'blocked': 13, 'qa': 22, 'done': 419, 'openBugs': 14, 'donePercent': 74}, 'workBreakdown': {'epics': {'total': 6, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 4}, 'features': {'total': 34, 'new': 3, 'progress': 4, 'qa': 1, 'blocked': 1, 'done': 25}, 'bugs': {'total': 65, 'new': 4, 'progress': 8, 'qa': 3, 'blocked': 2, 'done': 48}, 'tasks': {'total': 458, 'new': 27, 'progress': 53, 'qa': 18, 'blocked': 19, 'done': 341}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 13:34', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-18 16:34', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Project status reviewed and kept at At Risk.'}, {'dt': '2026-04-18', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-16', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-14', 'text': 'Recent work introduced a small QA spike.'}]}, {'id': 6, 'name': 'Identity Access Refresh', 'domain': 'Security', 'type': 'Mixed', 'status': 'At Risk', 'priority': 'P1', 'urgency': 'High', 'effort': 'Large', 'risk': 'High', 'sponsor': 'Security Office', 'created': '2025-08-18', 'updated': '2026-04-21', 'leads': ['Priya'], 'owners': {'dev': ['Priya', 'Jamie'], 'dba': ['Sam', 'Priya'], 'ba': ['Casey', 'Morgan'], 'tester': ['Jamie', 'Riley']}, 'metrics': {'total': 224, 'active': 47, 'blocked': 8, 'qa': 9, 'done': 156, 'openBugs': 12, 'donePercent': 70}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 13, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 9}, 'bugs': {'total': 45, 'new': 4, 'progress': 6, 'qa': 2, 'blocked': 2, 'done': 31}, 'tasks': {'total': 164, 'new': 12, 'progress': 22, 'qa': 8, 'blocked': 8, 'done': 114}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 09:03', 'type': 'Feature', 'item': 'Sync Workflow', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-19 17:03', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-19', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 7, 'name': 'Appointment Scheduling', 'domain': 'Customer Services', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'Medium', 'effort': 'Medium', 'risk': 'Low', 'sponsor': 'Scheduling Team', 'created': '2025-05-27', 'updated': '2026-04-16', 'leads': ['Jamie'], 'owners': {'dev': ['Jamie', 'Taylor'], 'dba': ['Sam', 'Priya'], 'ba': ['Morgan'], 'tester': ['Riley']}, 'metrics': {'total': 146, 'active': 18, 'blocked': 1, 'qa': 2, 'done': 123, 'openBugs': 3, 'donePercent': 84}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 9, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 8}, 'bugs': {'total': 16, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 13}, 'tasks': {'total': 119, 'new': 4, 'progress': 9, 'qa': 3, 'blocked': 3, 'done': 100}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 12:27', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-20 16:18', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-17', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-15', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-13', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 8, 'name': 'Document Generation Engine', 'domain': 'Shared Services', 'type': 'Mixed', 'status': 'Blocked', 'priority': 'P2', 'urgency': 'High', 'effort': 'Large', 'risk': 'High', 'sponsor': 'Document Services', 'created': '2025-06-11', 'updated': '2026-04-17', 'leads': ['Alex'], 'owners': {'dev': ['Alex', 'Casey'], 'dba': ['Sam', 'Priya'], 'ba': ['Jordan', 'Casey'], 'tester': ['Jamie', 'Riley']}, 'metrics': {'total': 332, 'active': 51, 'blocked': 17, 'qa': 8, 'done': 238, 'openBugs': 11, 'donePercent': 72}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 20, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 14}, 'bugs': {'total': 66, 'new': 5, 'progress': 9, 'qa': 3, 'blocked': 2, 'done': 47}, 'tasks': {'total': 243, 'new': 17, 'progress': 31, 'qa': 10, 'blocked': 11, 'done': 174}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 16:27', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-20 12:27', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-18 13:18', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-18 15:11', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-15 17:51', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-17', 'text': 'Project status reviewed and kept at Blocked.'}, {'dt': '2026-04-15', 'text': 'Project status reviewed and kept at Blocked.'}]}, {'id': 9, 'name': 'Provider Credentialing Hub', 'domain': 'Security', 'type': 'Bug Fix', 'status': 'Healthy', 'priority': 'P1', 'urgency': 'High', 'effort': 'Small', 'risk': 'Low', 'sponsor': 'Contact Center', 'created': '2025-12-03', 'updated': '2026-04-12', 'leads': ['Sam'], 'owners': {'dev': ['Sam'], 'dba': ['Sam', 'Priya'], 'ba': ['Jordan'], 'tester': ['Jamie']}, 'metrics': {'total': 185, 'active': 29, 'blocked': 1, 'qa': 1, 'done': 137, 'openBugs': 7, 'donePercent': 74}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 11, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 8}, 'bugs': {'total': 37, 'new': 3, 'progress': 4, 'qa': 2, 'blocked': 1, 'done': 27}, 'tasks': {'total': 135, 'new': 8, 'progress': 16, 'qa': 5, 'blocked': 6, 'done': 100}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 11:18', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-19 16:27', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-18 17:51', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-15', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 10, 'name': 'Eligibility Rules Refresh', 'domain': 'Claims', 'type': 'Bug Fix', 'status': 'Healthy', 'priority': 'P1', 'urgency': 'Medium', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Operations', 'created': '2025-05-08', 'updated': '2026-04-07', 'leads': ['Alex', 'Morgan'], 'owners': {'dev': ['Alex', 'Morgan'], 'dba': ['Sam', 'Priya'], 'ba': ['Jordan', 'Casey'], 'tester': ['Jamie']}, 'metrics': {'total': 174, 'active': 10, 'blocked': 2, 'qa': 3, 'done': 146, 'openBugs': 10, 'donePercent': 84}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 10, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 8}, 'bugs': {'total': 35, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 29}, 'tasks': {'total': 127, 'new': 5, 'progress': 9, 'qa': 3, 'blocked': 3, 'done': 107}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 16:34', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-18 16:18', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-19 14:03', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-16', 'text': 'Project status reviewed and kept at Healthy.'}]}, {'id': 11, 'name': 'Billing Statement Redesign', 'domain': 'Customer Experience', 'type': 'Enhancement', 'status': 'Blocked', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Small', 'risk': 'High', 'sponsor': 'Security Office', 'created': '2025-12-28', 'updated': '2026-04-14', 'leads': ['Jamie', 'Riley'], 'owners': {'dev': ['Jamie', 'Riley'], 'dba': ['Sam', 'Priya'], 'ba': ['Casey'], 'tester': ['Jamie']}, 'metrics': {'total': 190, 'active': 20, 'blocked': 10, 'qa': 0, 'done': 86, 'openBugs': 18, 'donePercent': 45}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 11, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 5}, 'bugs': {'total': 38, 'new': 6, 'progress': 9, 'qa': 3, 'blocked': 3, 'done': 17}, 'tasks': {'total': 139, 'new': 19, 'progress': 34, 'qa': 11, 'blocked': 12, 'done': 63}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 13:34', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-20 09:51', 'type': 'Feature', 'item': 'Sync Workflow', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-18 12:03', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 12:27', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 12:03', 'type': 'Task', 'item': 'Logging Cleanup', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Project status reviewed and kept at Blocked.'}, {'dt': '2026-04-18', 'text': 'Project status reviewed and kept at Blocked.'}]}, {'id': 12, 'name': 'Fraud Review Console', 'domain': 'Finance', 'type': 'New Application', 'status': 'Blocked', 'priority': 'P2', 'urgency': 'Low', 'effort': 'Medium', 'risk': 'High', 'sponsor': 'Digital Experience', 'created': '2025-02-26', 'updated': '2026-04-06', 'leads': ['Alex', 'Taylor'], 'owners': {'dev': ['Alex', 'Taylor'], 'dba': ['Sam'], 'ba': ['Morgan'], 'tester': ['Jamie', 'Riley']}, 'metrics': {'total': 386, 'active': 52, 'blocked': 6, 'qa': 12, 'done': 228, 'openBugs': 10, 'donePercent': 59}, 'workBreakdown': {'epics': {'total': 4, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 23, 'new': 3, 'progress': 4, 'qa': 1, 'blocked': 1, 'done': 14}, 'bugs': {'total': 54, 'new': 6, 'progress': 10, 'qa': 3, 'blocked': 3, 'done': 32}, 'tasks': {'total': 305, 'new': 30, 'progress': 56, 'qa': 19, 'blocked': 20, 'done': 180}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 12:03', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-18 15:11', 'type': 'Epic', 'item': 'Workflow Foundation', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-17 15:34', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-19', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-14', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 13, 'name': 'Contact Center Knowledge Base', 'domain': 'Communications', 'type': 'New Application', 'status': 'At Risk', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Small', 'risk': 'Medium', 'sponsor': 'Claims Operations', 'created': '2025-01-24', 'updated': '2026-04-15', 'leads': ['Taylor'], 'owners': {'dev': ['Taylor', 'Morgan'], 'dba': ['Priya'], 'ba': ['Casey'], 'tester': ['Jamie']}, 'metrics': {'total': 455, 'active': 45, 'blocked': 8, 'qa': 5, 'done': 205, 'openBugs': 11, 'donePercent': 45}, 'workBreakdown': {'epics': {'total': 5, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 27, 'new': 4, 'progress': 7, 'qa': 2, 'blocked': 2, 'done': 12}, 'bugs': {'total': 51, 'new': 7, 'progress': 13, 'qa': 4, 'blocked': 4, 'done': 23}, 'tasks': {'total': 372, 'new': 48, 'progress': 92, 'qa': 31, 'blocked': 33, 'done': 168}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 10:03', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-19 12:34', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-19', 'text': 'Project status reviewed and kept at At Risk.'}]}, {'id': 14, 'name': 'Member ID Card Service', 'domain': 'Communications', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'Medium', 'effort': 'Medium', 'risk': 'Low', 'sponsor': 'Executive Reporting', 'created': '2026-01-27', 'updated': '2026-04-11', 'leads': ['Taylor', 'Jordan'], 'owners': {'dev': ['Taylor', 'Jordan'], 'dba': ['Sam', 'Priya'], 'ba': ['Morgan'], 'tester': ['Jamie', 'Riley']}, 'metrics': {'total': 406, 'active': 65, 'blocked': 3, 'qa': 16, 'done': 322, 'openBugs': 12, 'donePercent': 79}, 'workBreakdown': {'epics': {'total': 4, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 3}, 'features': {'total': 24, 'new': 1, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 19}, 'bugs': {'total': 70, 'new': 4, 'progress': 6, 'qa': 2, 'blocked': 2, 'done': 56}, 'tasks': {'total': 308, 'new': 15, 'progress': 29, 'qa': 10, 'blocked': 10, 'done': 244}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 08:51', 'type': 'Bug', 'item': 'Export Failure', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-20 08:03', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-19 14:51', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-17', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-15', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-14', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 15, 'name': 'Prior Authorization Tracker', 'domain': 'Mobile', 'type': 'Mixed', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'High', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Finance', 'created': '2025-09-03', 'updated': '2026-04-10', 'leads': ['Casey'], 'owners': {'dev': ['Casey', 'Alex'], 'dba': ['Priya', 'Sam'], 'ba': ['Casey', 'Morgan'], 'tester': ['Riley']}, 'metrics': {'total': 129, 'active': 12, 'blocked': 1, 'qa': 2, 'done': 114, 'openBugs': 1, 'donePercent': 88}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 8, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 7}, 'bugs': {'total': 19, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 17}, 'tasks': {'total': 100, 'new': 3, 'progress': 5, 'qa': 2, 'blocked': 2, 'done': 88}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 09:42', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-19 16:18', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-16', 'text': 'Project status reviewed and kept at Healthy.'}]}, {'id': 16, 'name': 'Appeals Workflow', 'domain': 'Eligibility', 'type': 'New Application', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'High', 'effort': 'Large', 'risk': 'Medium', 'sponsor': 'Claims Operations', 'created': '2025-02-27', 'updated': '2026-04-12', 'leads': ['Priya'], 'owners': {'dev': ['Priya', 'Riley'], 'dba': ['Sam', 'Priya'], 'ba': ['Jordan'], 'tester': ['Taylor', 'Riley']}, 'metrics': {'total': 677, 'active': 33, 'blocked': 3, 'qa': 7, 'done': 555, 'openBugs': 7, 'donePercent': 82}, 'workBreakdown': {'epics': {'total': 7, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 6}, 'features': {'total': 41, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 34}, 'bugs': {'total': 37, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 30}, 'tasks': {'total': 592, 'new': 26, 'progress': 48, 'qa': 16, 'blocked': 17, 'done': 485}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 13:03', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-19 14:03', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 12:18', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-17', 'text': 'Project status reviewed and kept at Healthy.'}]}, {'id': 17, 'name': 'Care Plan Dashboard', 'domain': 'Finance', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'High', 'effort': 'Medium', 'risk': 'Low', 'sponsor': 'Executive Reporting', 'created': '2025-10-11', 'updated': '2026-04-18', 'leads': ['Morgan'], 'owners': {'dev': ['Morgan'], 'dba': ['Priya', 'Sam'], 'ba': ['Jordan', 'Morgan'], 'tester': ['Riley']}, 'metrics': {'total': 115, 'active': 18, 'blocked': 3, 'qa': 2, 'done': 92, 'openBugs': 1, 'donePercent': 80}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 7, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 6}, 'bugs': {'total': 23, 'new': 1, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 18}, 'tasks': {'total': 83, 'new': 3, 'progress': 8, 'qa': 3, 'blocked': 3, 'done': 66}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 13:18', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-19 11:18', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-19 10:42', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-18', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 18, 'name': 'Agent Performance Analytics', 'domain': 'Finance', 'type': 'Enhancement', 'status': 'At Risk', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Executive Reporting', 'created': '2025-07-16', 'updated': '2026-04-14', 'leads': ['Riley'], 'owners': {'dev': ['Riley'], 'dba': ['Sam'], 'ba': ['Jordan', 'Morgan'], 'tester': ['Riley']}, 'metrics': {'total': 228, 'active': 26, 'blocked': 9, 'qa': 2, 'done': 157, 'openBugs': 12, 'donePercent': 69}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 14, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 10}, 'bugs': {'total': 46, 'new': 4, 'progress': 6, 'qa': 2, 'blocked': 2, 'done': 32}, 'tasks': {'total': 166, 'new': 13, 'progress': 23, 'qa': 8, 'blocked': 8, 'done': 114}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 14:27', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-19 08:11', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-17 15:03', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-18', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 19, 'name': 'Contract Import Utility', 'domain': 'Operations', 'type': 'Enhancement', 'status': 'Blocked', 'priority': 'P3', 'urgency': 'High', 'effort': 'Large', 'risk': 'High', 'sponsor': 'Executive Reporting', 'created': '2025-12-24', 'updated': '2026-04-04', 'leads': ['Morgan'], 'owners': {'dev': ['Morgan'], 'dba': ['Priya', 'Sam'], 'ba': ['Jordan', 'Casey'], 'tester': ['Riley', 'Jamie']}, 'metrics': {'total': 243, 'active': 18, 'blocked': 8, 'qa': 3, 'done': 187, 'openBugs': 8, 'donePercent': 77}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 15, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 12}, 'bugs': {'total': 49, 'new': 3, 'progress': 5, 'qa': 2, 'blocked': 1, 'done': 38}, 'tasks': {'total': 177, 'new': 10, 'progress': 18, 'qa': 6, 'blocked': 7, 'done': 136}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 12:18', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-18 11:34', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-19', 'text': 'Project status reviewed and kept at Blocked.'}]}, {'id': 20, 'name': 'Email Preference Center', 'domain': 'Communications', 'type': 'New Application', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Large', 'risk': 'Low', 'sponsor': 'Finance', 'created': '2025-04-16', 'updated': '2026-04-16', 'leads': ['Jordan'], 'owners': {'dev': ['Jordan', 'Casey'], 'dba': ['Priya'], 'ba': ['Casey'], 'tester': ['Jamie', 'Taylor']}, 'metrics': {'total': 378, 'active': 34, 'blocked': 0, 'qa': 4, 'done': 291, 'openBugs': 10, 'donePercent': 77}, 'workBreakdown': {'epics': {'total': 4, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 3}, 'features': {'total': 23, 'new': 1, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 18}, 'bugs': {'total': 55, 'new': 3, 'progress': 6, 'qa': 2, 'blocked': 2, 'done': 42}, 'tasks': {'total': 296, 'new': 16, 'progress': 31, 'qa': 10, 'blocked': 11, 'done': 228}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 08:34', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-20 08:34', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 08:11', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-17', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 21, 'name': 'Document Archive Search', 'domain': 'Provider', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P1', 'urgency': 'Critical', 'effort': 'Medium', 'risk': 'Low', 'sponsor': 'Digital Experience', 'created': '2025-07-14', 'updated': '2026-04-12', 'leads': ['Riley', 'Morgan'], 'owners': {'dev': ['Riley', 'Morgan', 'Priya'], 'dba': ['Priya'], 'ba': ['Jordan'], 'tester': ['Taylor', 'Riley']}, 'metrics': {'total': 115, 'active': 16, 'blocked': 1, 'qa': 3, 'done': 95, 'openBugs': 6, 'donePercent': 83}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 7, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 6}, 'bugs': {'total': 23, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 19}, 'tasks': {'total': 83, 'new': 4, 'progress': 6, 'qa': 2, 'blocked': 2, 'done': 69}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 14:03', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-20 08:18', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 13:18', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-18 12:42', 'type': 'Bug', 'item': 'Export Failure', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-16 08:42', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-19', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-16', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-14', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 22, 'name': 'Notification Delivery Service', 'domain': 'Customer Experience', 'type': 'Bug Fix', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'High', 'effort': 'Medium', 'risk': 'High', 'sponsor': 'Executive Reporting', 'created': '2026-01-21', 'updated': '2026-04-06', 'leads': ['Riley'], 'owners': {'dev': ['Riley'], 'dba': ['Sam'], 'ba': ['Morgan', 'Jordan'], 'tester': ['Riley', 'Jamie']}, 'metrics': {'total': 61, 'active': 13, 'blocked': 3, 'qa': 1, 'done': 44, 'openBugs': 2, 'donePercent': 72}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 6, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 4}, 'bugs': {'total': 10, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 7}, 'tasks': {'total': 43, 'new': 3, 'progress': 5, 'qa': 2, 'blocked': 2, 'done': 31}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 09:27', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-20 11:11', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-17 11:42', 'type': 'Feature', 'item': 'Sync Workflow', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-17 12:34', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-19', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 23, 'name': 'Coverage Lookup API', 'domain': 'Finance', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'Medium', 'effort': 'Large', 'risk': 'Medium', 'sponsor': 'Finance', 'created': '2025-01-03', 'updated': '2026-04-16', 'leads': ['Priya'], 'owners': {'dev': ['Priya'], 'dba': ['Priya'], 'ba': ['Morgan', 'Casey'], 'tester': ['Taylor']}, 'metrics': {'total': 281, 'active': 28, 'blocked': 0, 'qa': 1, 'done': 200, 'openBugs': 4, 'donePercent': 71}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 17, 'new': 1, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 12}, 'bugs': {'total': 35, 'new': 3, 'progress': 4, 'qa': 2, 'blocked': 1, 'done': 25}, 'tasks': {'total': 226, 'new': 16, 'progress': 29, 'qa': 10, 'blocked': 10, 'done': 161}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 10:27', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-20 17:42', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-19 13:18', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-19', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 24, 'name': 'Audit Trail Consolidation', 'domain': 'Mobile', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'Medium', 'effort': 'Very Large', 'risk': 'High', 'sponsor': 'Security Office', 'created': '2025-11-24', 'updated': '2026-04-18', 'leads': ['Taylor'], 'owners': {'dev': ['Taylor', 'Sam'], 'dba': ['Sam'], 'ba': ['Casey', 'Jordan'], 'tester': ['Riley']}, 'metrics': {'total': 293, 'active': 33, 'blocked': 0, 'qa': 6, 'done': 229, 'openBugs': 5, 'donePercent': 78}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 18, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 14}, 'bugs': {'total': 43, 'new': 3, 'progress': 4, 'qa': 1, 'blocked': 1, 'done': 34}, 'tasks': {'total': 229, 'new': 12, 'progress': 22, 'qa': 8, 'blocked': 8, 'done': 179}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 13:42', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-20 08:27', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-19 14:34', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-18 08:03', 'type': 'Task', 'item': 'Retry Rules', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-19', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 25, 'name': 'Claims Intake Lite', 'domain': 'Finance', 'type': 'New Application', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'Low', 'effort': 'Large', 'risk': 'High', 'sponsor': 'Contact Center', 'created': '2025-06-11', 'updated': '2026-04-02', 'leads': ['Morgan', 'Taylor'], 'owners': {'dev': ['Morgan', 'Taylor', 'Jamie'], 'dba': ['Priya', 'Sam'], 'ba': ['Jordan'], 'tester': ['Jamie', 'Riley']}, 'metrics': {'total': 407, 'active': 50, 'blocked': 1, 'qa': 2, 'done': 354, 'openBugs': 1, 'donePercent': 87}, 'workBreakdown': {'epics': {'total': 4, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 3}, 'features': {'total': 24, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 21}, 'bugs': {'total': 16, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 14}, 'tasks': {'total': 363, 'new': 11, 'progress': 21, 'qa': 7, 'blocked': 8, 'done': 316}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 10:11', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-18 08:42', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-17 15:34', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-18', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-17', 'text': 'Recent work introduced a small QA spike.'}]}, {'id': 26, 'name': 'Premium Reconciliation', 'domain': 'Claims', 'type': 'Enhancement', 'status': 'At Risk', 'priority': 'P3', 'urgency': 'Low', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Security Office', 'created': '2025-07-03', 'updated': '2026-04-14', 'leads': ['Morgan', 'Priya'], 'owners': {'dev': ['Morgan', 'Priya', 'Taylor'], 'dba': ['Priya', 'Sam'], 'ba': ['Casey'], 'tester': ['Riley', 'Jamie']}, 'metrics': {'total': 348, 'active': 19, 'blocked': 1, 'qa': 1, 'done': 230, 'openBugs': 24, 'donePercent': 66}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 21, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 14}, 'bugs': {'total': 70, 'new': 6, 'progress': 11, 'qa': 4, 'blocked': 3, 'done': 46}, 'tasks': {'total': 254, 'new': 20, 'progress': 39, 'qa': 13, 'blocked': 14, 'done': 168}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 10:03', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-20 10:27', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-19', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 27, 'name': 'EOB Viewer Upgrade', 'domain': 'Operations', 'type': 'Bug Fix', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'High', 'effort': 'Medium', 'risk': 'Low', 'sponsor': 'Provider Services', 'created': '2025-07-12', 'updated': '2026-04-06', 'leads': ['Morgan', 'Alex'], 'owners': {'dev': ['Morgan', 'Alex'], 'dba': ['Sam'], 'ba': ['Casey', 'Jordan'], 'tester': ['Taylor', 'Riley']}, 'metrics': {'total': 137, 'active': 17, 'blocked': 2, 'qa': 0, 'done': 115, 'openBugs': 9, 'donePercent': 84}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 8, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 7}, 'bugs': {'total': 27, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 23}, 'tasks': {'total': 100, 'new': 4, 'progress': 7, 'qa': 2, 'blocked': 3, 'done': 84}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 14:18', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-19 09:27', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-18 16:18', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-16 08:11', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-15 14:27', 'type': 'Bug', 'item': 'Export Failure', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-18', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-15', 'text': 'Project status reviewed and kept at Healthy.'}]}, {'id': 28, 'name': 'Benefit Plan Compare', 'domain': 'Finance', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P1', 'urgency': 'Medium', 'effort': 'Small', 'risk': 'High', 'sponsor': 'Digital Experience', 'created': '2025-12-29', 'updated': '2026-04-05', 'leads': ['Morgan', 'Sam'], 'owners': {'dev': ['Morgan', 'Sam', 'Taylor'], 'dba': ['Sam', 'Priya'], 'ba': ['Morgan'], 'tester': ['Taylor', 'Riley']}, 'metrics': {'total': 416, 'active': 45, 'blocked': 0, 'qa': 4, 'done': 308, 'openBugs': 1, 'donePercent': 74}, 'workBreakdown': {'epics': {'total': 4, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 3}, 'features': {'total': 25, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 19}, 'bugs': {'total': 24, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 18}, 'tasks': {'total': 363, 'new': 23, 'progress': 42, 'qa': 14, 'blocked': 15, 'done': 269}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 17:34', 'type': 'Bug', 'item': 'Export Failure', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-20 08:03', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-18 10:11', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-18 17:34', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-19', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 29, 'name': 'Case Notes Search', 'domain': 'Claims', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P4', 'urgency': 'Critical', 'effort': 'Medium', 'risk': 'High', 'sponsor': 'Claims Operations', 'created': '2025-04-29', 'updated': '2026-04-21', 'leads': ['Morgan'], 'owners': {'dev': ['Morgan'], 'dba': ['Sam'], 'ba': ['Jordan'], 'tester': ['Riley']}, 'metrics': {'total': 261, 'active': 21, 'blocked': 3, 'qa': 5, 'done': 204, 'openBugs': 11, 'donePercent': 78}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 16, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 13}, 'bugs': {'total': 52, 'new': 3, 'progress': 5, 'qa': 2, 'blocked': 1, 'done': 41}, 'tasks': {'total': 190, 'new': 10, 'progress': 18, 'qa': 6, 'blocked': 7, 'done': 149}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 16:03', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-18 11:11', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-18 13:34', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 15:51', 'type': 'Task', 'item': 'API Mapping', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-18', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-15', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-15', 'text': 'Recent work introduced a small QA spike.'}]}, {'id': 30, 'name': 'Clinical Review Workbench', 'domain': 'Eligibility', 'type': 'Bug Fix', 'status': 'Healthy', 'priority': 'P4', 'urgency': 'Medium', 'effort': 'Very Large', 'risk': 'High', 'sponsor': 'Operations', 'created': '2025-12-23', 'updated': '2026-04-03', 'leads': ['Morgan'], 'owners': {'dev': ['Morgan', 'Sam'], 'dba': ['Priya', 'Sam'], 'ba': ['Jordan', 'Casey'], 'tester': ['Jamie']}, 'metrics': {'total': 138, 'active': 10, 'blocked': 0, 'qa': 3, 'done': 105, 'openBugs': 4, 'donePercent': 76}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 8, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 6}, 'bugs': {'total': 22, 'new': 1, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 17}, 'tasks': {'total': 106, 'new': 6, 'progress': 11, 'qa': 4, 'blocked': 4, 'done': 81}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 09:51', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-19 09:11', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-18 13:18', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-18', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-17', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 31, 'name': 'Broker Portal Enhancements', 'domain': 'Operations', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'Medium', 'effort': 'Small', 'risk': 'Medium', 'sponsor': 'Security Office', 'created': '2025-08-12', 'updated': '2026-04-01', 'leads': ['Jordan'], 'owners': {'dev': ['Jordan', 'Jordan'], 'dba': ['Sam', 'Priya'], 'ba': ['Casey'], 'tester': ['Taylor']}, 'metrics': {'total': 117, 'active': 9, 'blocked': 1, 'qa': 3, 'done': 82, 'openBugs': 8, 'donePercent': 70}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 7, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 5}, 'bugs': {'total': 23, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 16}, 'tasks': {'total': 85, 'new': 6, 'progress': 11, 'qa': 4, 'blocked': 4, 'done': 60}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 10:18', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-19 10:03', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-17 16:51', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-18 14:27', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-18', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 32, 'name': 'Auto Assignment Rules', 'domain': 'Shared Services', 'type': 'Bug Fix', 'status': 'At Risk', 'priority': 'P3', 'urgency': 'Critical', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Provider Services', 'created': '2025-03-28', 'updated': '2026-04-15', 'leads': ['Jordan', 'Casey'], 'owners': {'dev': ['Jordan', 'Casey', 'Jordan'], 'dba': ['Sam'], 'ba': ['Casey'], 'tester': ['Jamie']}, 'metrics': {'total': 77, 'active': 11, 'blocked': 4, 'qa': 2, 'done': 45, 'openBugs': 25, 'donePercent': 58}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 6, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 4}, 'bugs': {'total': 15, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 9}, 'tasks': {'total': 54, 'new': 5, 'progress': 10, 'qa': 3, 'blocked': 4, 'done': 32}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 13:34', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-20 13:11', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-19 09:11', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-17', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 33, 'name': 'Letters Template Manager', 'domain': 'Operations', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'Medium', 'effort': 'Large', 'risk': 'Low', 'sponsor': 'Contact Center', 'created': '2025-01-12', 'updated': '2026-04-05', 'leads': ['Riley', 'Alex'], 'owners': {'dev': ['Riley', 'Alex', 'Alex'], 'dba': ['Priya', 'Sam'], 'ba': ['Casey'], 'tester': ['Riley']}, 'metrics': {'total': 214, 'active': 28, 'blocked': 1, 'qa': 6, 'done': 178, 'openBugs': 11, 'donePercent': 83}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 13, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 11}, 'bugs': {'total': 43, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 36}, 'tasks': {'total': 156, 'new': 6, 'progress': 12, 'qa': 4, 'blocked': 4, 'done': 130}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 09:27', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-18 09:27', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-18 14:27', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 34, 'name': 'Enrollment Sync', 'domain': 'Shared Services', 'type': 'Bug Fix', 'status': 'Blocked', 'priority': 'P1', 'urgency': 'High', 'effort': 'Small', 'risk': 'High', 'sponsor': 'Digital Experience', 'created': '2026-01-03', 'updated': '2026-04-16', 'leads': ['Jamie'], 'owners': {'dev': ['Jamie', 'Riley'], 'dba': ['Priya'], 'ba': ['Jordan', 'Morgan'], 'tester': ['Riley']}, 'metrics': {'total': 178, 'active': 14, 'blocked': 12, 'qa': 1, 'done': 123, 'openBugs': 17, 'donePercent': 69}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 11, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 8}, 'bugs': {'total': 36, 'new': 3, 'progress': 5, 'qa': 2, 'blocked': 1, 'done': 25}, 'tasks': {'total': 129, 'new': 10, 'progress': 18, 'qa': 6, 'blocked': 6, 'done': 89}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 08:18', 'type': 'Bug', 'item': 'Export Failure', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-20 08:03', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-17', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 35, 'name': 'Remittance Matching', 'domain': 'BI / Data', 'type': 'Bug Fix', 'status': 'At Risk', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Large', 'risk': 'Low', 'sponsor': 'Executive Reporting', 'created': '2025-08-28', 'updated': '2026-04-10', 'leads': ['Priya'], 'owners': {'dev': ['Priya', 'Jamie'], 'dba': ['Sam'], 'ba': ['Morgan', 'Jordan'], 'tester': ['Taylor']}, 'metrics': {'total': 135, 'active': 18, 'blocked': 6, 'qa': 2, 'done': 72, 'openBugs': 22, 'donePercent': 53}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 8, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 4}, 'bugs': {'total': 27, 'new': 3, 'progress': 6, 'qa': 2, 'blocked': 2, 'done': 14}, 'tasks': {'total': 98, 'new': 11, 'progress': 21, 'qa': 7, 'blocked': 7, 'done': 52}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 11:42', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-19 14:34', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-19 12:51', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-16 13:51', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 08:11', 'type': 'Bug', 'item': 'Export Failure', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-17', 'text': 'Project status reviewed and kept at At Risk.'}, {'dt': '2026-04-15', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-15', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 36, 'name': 'Queue Routing Engine', 'domain': 'Claims', 'type': 'Mixed', 'status': 'At Risk', 'priority': 'P3', 'urgency': 'High', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Contact Center', 'created': '2025-12-10', 'updated': '2026-04-04', 'leads': ['Jordan'], 'owners': {'dev': ['Jordan', 'Taylor'], 'dba': ['Sam', 'Priya'], 'ba': ['Casey', 'Jordan'], 'tester': ['Jamie', 'Taylor']}, 'metrics': {'total': 304, 'active': 45, 'blocked': 8, 'qa': 7, 'done': 216, 'openBugs': 2, 'donePercent': 71}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 18, 'new': 1, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 13}, 'bugs': {'total': 23, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 16}, 'tasks': {'total': 260, 'new': 18, 'progress': 34, 'qa': 11, 'blocked': 12, 'done': 185}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 15:11', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-20 13:27', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-17 12:51', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-17 09:11', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-17 17:03', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Project status reviewed and kept at At Risk.'}, {'dt': '2026-04-17', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-16', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-15', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 37, 'name': 'Outbound Messaging Refresh', 'domain': 'Provider', 'type': 'Enhancement', 'status': 'At Risk', 'priority': 'P3', 'urgency': 'High', 'effort': 'Small', 'risk': 'Medium', 'sponsor': 'Claims Operations', 'created': '2025-09-17', 'updated': '2026-04-12', 'leads': ['Priya'], 'owners': {'dev': ['Priya'], 'dba': ['Sam'], 'ba': ['Morgan'], 'tester': ['Taylor', 'Riley']}, 'metrics': {'total': 150, 'active': 17, 'blocked': 9, 'qa': 1, 'done': 76, 'openBugs': 21, 'donePercent': 51}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 9, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 5}, 'bugs': {'total': 30, 'new': 4, 'progress': 7, 'qa': 2, 'blocked': 2, 'done': 15}, 'tasks': {'total': 109, 'new': 13, 'progress': 24, 'qa': 8, 'blocked': 9, 'done': 55}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 16:34', 'type': 'Feature', 'item': 'Sync Workflow', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-20 08:03', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Project status reviewed and kept at At Risk.'}, {'dt': '2026-04-17', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-15', 'text': 'Recent work introduced a small QA spike.'}]}, {'id': 38, 'name': 'Task SLA Monitoring', 'domain': 'BI / Data', 'type': 'New Application', 'status': 'Healthy', 'priority': 'P1', 'urgency': 'Medium', 'effort': 'Small', 'risk': 'Low', 'sponsor': 'Security Office', 'created': '2026-02-07', 'updated': '2026-04-10', 'leads': ['Jordan', 'Taylor'], 'owners': {'dev': ['Jordan', 'Taylor'], 'dba': ['Sam'], 'ba': ['Jordan', 'Morgan'], 'tester': ['Riley']}, 'metrics': {'total': 611, 'active': 85, 'blocked': 0, 'qa': 18, 'done': 434, 'openBugs': 8, 'donePercent': 71}, 'workBreakdown': {'epics': {'total': 6, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 4}, 'features': {'total': 37, 'new': 2, 'progress': 5, 'qa': 2, 'blocked': 2, 'done': 26}, 'bugs': {'total': 50, 'new': 4, 'progress': 6, 'qa': 2, 'blocked': 2, 'done': 36}, 'tasks': {'total': 518, 'new': 36, 'progress': 68, 'qa': 22, 'blocked': 24, 'done': 368}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 14:27', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-18 17:42', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-19', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-15', 'text': 'Recent work introduced a small QA spike.'}]}, {'id': 39, 'name': 'Service Request Intake', 'domain': 'Communications', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'High', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Security Office', 'created': '2025-01-26', 'updated': '2026-04-12', 'leads': ['Morgan'], 'owners': {'dev': ['Morgan'], 'dba': ['Priya'], 'ba': ['Morgan'], 'tester': ['Jamie', 'Taylor']}, 'metrics': {'total': 240, 'active': 26, 'blocked': 2, 'qa': 5, 'done': 207, 'openBugs': 1, 'donePercent': 86}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 14, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 12}, 'bugs': {'total': 26, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 22}, 'tasks': {'total': 198, 'new': 7, 'progress': 12, 'qa': 4, 'blocked': 4, 'done': 171}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 17:03', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-18 17:11', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-18', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-15', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-14', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 40, 'name': 'Image Upload Reliability', 'domain': 'Billing', 'type': 'Bug Fix', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Large', 'risk': 'Medium', 'sponsor': 'Provider Services', 'created': '2025-11-07', 'updated': '2026-04-01', 'leads': ['Jordan'], 'owners': {'dev': ['Jordan', 'Casey'], 'dba': ['Priya'], 'ba': ['Morgan'], 'tester': ['Jamie', 'Riley']}, 'metrics': {'total': 154, 'active': 20, 'blocked': 1, 'qa': 4, 'done': 119, 'openBugs': 8, 'donePercent': 77}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 9, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 7}, 'bugs': {'total': 31, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 24}, 'tasks': {'total': 112, 'new': 6, 'progress': 11, 'qa': 4, 'blocked': 4, 'done': 87}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 14:11', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-20 17:11', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-18', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-17', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-13', 'text': 'Recent work introduced a small QA spike.'}]}, {'id': 41, 'name': 'Plan Directory Portal', 'domain': 'BI / Data', 'type': 'Mixed', 'status': 'At Risk', 'priority': 'P1', 'urgency': 'Medium', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Finance', 'created': '2025-04-30', 'updated': '2026-04-13', 'leads': ['Sam', 'Jamie'], 'owners': {'dev': ['Sam', 'Jamie'], 'dba': ['Priya', 'Sam'], 'ba': ['Casey'], 'tester': ['Jamie']}, 'metrics': {'total': 334, 'active': 28, 'blocked': 3, 'qa': 3, 'done': 210, 'openBugs': 3, 'donePercent': 63}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 20, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 13}, 'bugs': {'total': 17, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 11}, 'tasks': {'total': 294, 'new': 27, 'progress': 49, 'qa': 16, 'blocked': 17, 'done': 185}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 13:27', 'type': 'Feature', 'item': 'Sync Workflow', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-20 15:18', 'type': 'Epic', 'item': 'Workflow Foundation', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-19 10:18', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-17 16:34', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-17', 'text': 'Recent work introduced a small QA spike.'}]}, {'id': 42, 'name': 'Account Merge Utility', 'domain': 'BI / Data', 'type': 'Mixed', 'status': 'Healthy', 'priority': 'P4', 'urgency': 'Medium', 'effort': 'Very Large', 'risk': 'High', 'sponsor': 'Contact Center', 'created': '2025-09-07', 'updated': '2026-04-03', 'leads': ['Morgan', 'Sam'], 'owners': {'dev': ['Morgan', 'Sam', 'Morgan'], 'dba': ['Priya', 'Sam'], 'ba': ['Casey', 'Jordan'], 'tester': ['Jamie', 'Taylor']}, 'metrics': {'total': 221, 'active': 31, 'blocked': 3, 'qa': 1, 'done': 177, 'openBugs': 3, 'donePercent': 80}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 13, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 10}, 'bugs': {'total': 26, 'new': 1, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 21}, 'tasks': {'total': 180, 'new': 9, 'progress': 16, 'qa': 5, 'blocked': 6, 'done': 144}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 11:11', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-20 16:03', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-17 15:03', 'type': 'Feature', 'item': 'Sync Workflow', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-19', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 43, 'name': 'Legacy API Sunset', 'domain': 'Customer Experience', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P1', 'urgency': 'Medium', 'effort': 'Very Large', 'risk': 'Low', 'sponsor': 'Operations', 'created': '2025-03-22', 'updated': '2026-04-08', 'leads': ['Jamie'], 'owners': {'dev': ['Jamie', 'Morgan'], 'dba': ['Sam'], 'ba': ['Morgan'], 'tester': ['Jamie', 'Riley']}, 'metrics': {'total': 161, 'active': 20, 'blocked': 0, 'qa': 0, 'done': 135, 'openBugs': 8, 'donePercent': 84}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 10, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 8}, 'bugs': {'total': 32, 'new': 1, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 27}, 'tasks': {'total': 117, 'new': 4, 'progress': 9, 'qa': 3, 'blocked': 3, 'done': 98}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 13:11', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-20 15:34', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-18 14:27', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 17:51', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-18', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-16', 'text': 'Recent work introduced a small QA spike.'}]}, {'id': 44, 'name': 'User Session Hardening', 'domain': 'Claims', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'Low', 'effort': 'Small', 'risk': 'Low', 'sponsor': 'Executive Reporting', 'created': '2025-05-29', 'updated': '2026-04-14', 'leads': ['Alex'], 'owners': {'dev': ['Alex', 'Alex'], 'dba': ['Priya', 'Sam'], 'ba': ['Jordan', 'Morgan'], 'tester': ['Jamie', 'Riley']}, 'metrics': {'total': 240, 'active': 26, 'blocked': 2, 'qa': 6, 'done': 178, 'openBugs': 9, 'donePercent': 74}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 14, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 10}, 'bugs': {'total': 40, 'new': 3, 'progress': 4, 'qa': 2, 'blocked': 1, 'done': 30}, 'tasks': {'total': 184, 'new': 11, 'progress': 22, 'qa': 7, 'blocked': 8, 'done': 136}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 13:27', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-19 17:11', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-17 10:11', 'type': 'Epic', 'item': 'Workflow Foundation', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-16 15:51', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-17 17:42', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-18', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-17', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-13', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 45, 'name': 'Batch Adjudication Monitor', 'domain': 'BI / Data', 'type': 'Mixed', 'status': 'Healthy', 'priority': 'P1', 'urgency': 'Low', 'effort': 'Medium', 'risk': 'High', 'sponsor': 'Operations', 'created': '2025-07-02', 'updated': '2026-04-17', 'leads': ['Sam', 'Morgan'], 'owners': {'dev': ['Sam', 'Morgan'], 'dba': ['Priya'], 'ba': ['Morgan'], 'tester': ['Taylor', 'Riley']}, 'metrics': {'total': 151, 'active': 18, 'blocked': 0, 'qa': 3, 'done': 122, 'openBugs': 5, 'donePercent': 81}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 9, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 7}, 'bugs': {'total': 30, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 24}, 'tasks': {'total': 110, 'new': 6, 'progress': 9, 'qa': 3, 'blocked': 3, 'done': 89}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-20 16:03', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-20 11:03', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-19', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-16', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-15', 'text': 'Project status reviewed and kept at Healthy.'}]}, {'id': 46, 'name': 'Reimbursement Rules Engine', 'domain': 'Shared Services', 'type': 'Bug Fix', 'status': 'Healthy', 'priority': 'P4', 'urgency': 'Medium', 'effort': 'Very Large', 'risk': 'High', 'sponsor': 'Claims Operations', 'created': '2025-02-26', 'updated': '2026-04-04', 'leads': ['Riley'], 'owners': {'dev': ['Riley'], 'dba': ['Sam', 'Priya'], 'ba': ['Morgan'], 'tester': ['Riley']}, 'metrics': {'total': 80, 'active': 11, 'blocked': 3, 'qa': 1, 'done': 65, 'openBugs': 12, 'donePercent': 81}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 6, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 5}, 'bugs': {'total': 16, 'new': 2, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 13}, 'tasks': {'total': 56, 'new': 2, 'progress': 4, 'qa': 2, 'blocked': 2, 'done': 46}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 14:34', 'type': 'Epic', 'item': 'Operations Dashboard', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-19 08:51', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-19 13:42', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-17', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-16', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-15', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 47, 'name': 'Intake Forms Modernization', 'domain': 'Shared Services', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P3', 'urgency': 'High', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Operations', 'created': '2026-02-19', 'updated': '2026-04-02', 'leads': ['Jordan'], 'owners': {'dev': ['Jordan'], 'dba': ['Priya'], 'ba': ['Morgan', 'Casey'], 'tester': ['Riley', 'Taylor']}, 'metrics': {'total': 409, 'active': 22, 'blocked': 0, 'qa': 4, 'done': 319, 'openBugs': 5, 'donePercent': 78}, 'workBreakdown': {'epics': {'total': 4, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 3}, 'features': {'total': 25, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 19}, 'bugs': {'total': 23, 'new': 1, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 18}, 'tasks': {'total': 357, 'new': 18, 'progress': 36, 'qa': 12, 'blocked': 13, 'done': 278}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 12:03', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-20 08:34', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-17', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-17', 'text': 'Recent work introduced a small QA spike.'}]}, {'id': 48, 'name': 'Knowledge Search V2', 'domain': 'Provider', 'type': 'Bug Fix', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Large', 'risk': 'Medium', 'sponsor': 'Provider Services', 'created': '2025-08-24', 'updated': '2026-04-18', 'leads': ['Priya', 'Sam'], 'owners': {'dev': ['Priya', 'Sam', 'Priya'], 'dba': ['Priya'], 'ba': ['Casey', 'Jordan'], 'tester': ['Taylor']}, 'metrics': {'total': 124, 'active': 11, 'blocked': 3, 'qa': 1, 'done': 87, 'openBugs': 10, 'donePercent': 70}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 7, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 5}, 'bugs': {'total': 25, 'new': 2, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 18}, 'tasks': {'total': 90, 'new': 7, 'progress': 12, 'qa': 4, 'blocked': 4, 'done': 63}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 13:34', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-19 11:18', 'type': 'Feature', 'item': 'Notification Rules', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}], 'timeline': [{'dt': '2026-04-21', 'text': 'Updated after new delivery estimates were recorded.'}, {'dt': '2026-04-19', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 49, 'name': 'Call Wrap-Up Automation', 'domain': 'Operations', 'type': 'Bug Fix', 'status': 'Healthy', 'priority': 'P2', 'urgency': 'High', 'effort': 'Medium', 'risk': 'Medium', 'sponsor': 'Finance', 'created': '2026-01-14', 'updated': '2026-04-16', 'leads': ['Taylor', 'Riley'], 'owners': {'dev': ['Taylor', 'Riley', 'Casey'], 'dba': ['Sam', 'Priya'], 'ba': ['Jordan'], 'tester': ['Jamie']}, 'metrics': {'total': 71, 'active': 9, 'blocked': 3, 'qa': 3, 'done': 50, 'openBugs': 10, 'donePercent': 70}, 'workBreakdown': {'epics': {'total': 2, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 1}, 'features': {'total': 6, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 4}, 'bugs': {'total': 14, 'new': 0, 'progress': 2, 'qa': 1, 'blocked': 1, 'done': 10}, 'tasks': {'total': 49, 'new': 4, 'progress': 6, 'qa': 2, 'blocked': 2, 'done': 35}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 09:27', 'type': 'Feature', 'item': 'Sync Workflow', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-19 13:18', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-17 17:27', 'type': 'Feature', 'item': 'Sync Workflow', 'link': '#', 'note': 'ADO item updated with the latest implementation notes.'}, {'dt': '2026-04-16 15:27', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-15 12:51', 'type': 'Bug', 'item': 'Duplicate Record Issue', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Recent work introduced a small QA spike.'}, {'dt': '2026-04-17', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-17', 'text': 'Priority was reconfirmed during leadership triage.'}]}, {'id': 50, 'name': 'Claim Attachments Viewer', 'domain': 'Provider', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P4', 'urgency': 'Medium', 'effort': 'Medium', 'risk': 'Low', 'sponsor': 'Executive Reporting', 'created': '2025-07-19', 'updated': '2026-04-15', 'leads': ['Alex', 'Jamie'], 'owners': {'dev': ['Alex', 'Jamie'], 'dba': ['Sam', 'Priya'], 'ba': ['Casey'], 'tester': ['Taylor']}, 'metrics': {'total': 321, 'active': 49, 'blocked': 0, 'qa': 3, 'done': 225, 'openBugs': 7, 'donePercent': 70}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 19, 'new': 1, 'progress': 3, 'qa': 1, 'blocked': 1, 'done': 13}, 'bugs': {'total': 39, 'new': 3, 'progress': 5, 'qa': 2, 'blocked': 2, 'done': 27}, 'tasks': {'total': 260, 'new': 19, 'progress': 35, 'qa': 12, 'blocked': 12, 'done': 182}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-19 10:11', 'type': 'Bug', 'item': 'Export Failure', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-19 17:34', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-17 09:11', 'type': 'Bug', 'item': 'Export Failure', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-18 12:34', 'type': 'Bug', 'item': 'UI Validation Error', 'link': '#', 'note': 'Validation uncovered additional edge cases before release.'}, {'dt': '2026-04-15 13:51', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}], 'timeline': [{'dt': '2026-04-19', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-17', 'text': 'Priority was reconfirmed during leadership triage.'}, {'dt': '2026-04-15', 'text': 'Open work count shifted after latest sync from ADO.'}]}, {'id': 51, 'name': 'Member Timeline', 'domain': 'Claims', 'type': 'Enhancement', 'status': 'At Risk', 'priority': 'P2', 'urgency': 'Medium', 'effort': 'Very Large', 'risk': 'Medium', 'sponsor': 'Operations', 'created': '2025-12-09', 'updated': '2026-04-01', 'leads': ['Taylor'], 'owners': {'dev': ['Taylor', 'Alex'], 'dba': ['Sam'], 'ba': ['Morgan', 'Jordan'], 'tester': ['Riley', 'Taylor']}, 'metrics': {'total': 344, 'active': 51, 'blocked': 2, 'qa': 8, 'done': 217, 'openBugs': 19, 'donePercent': 63}, 'workBreakdown': {'epics': {'total': 3, 'new': 1, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 21, 'new': 2, 'progress': 4, 'qa': 1, 'blocked': 1, 'done': 13}, 'bugs': {'total': 69, 'new': 7, 'progress': 11, 'qa': 4, 'blocked': 3, 'done': 44}, 'tasks': {'total': 251, 'new': 22, 'progress': 42, 'qa': 14, 'blocked': 15, 'done': 158}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 10:34', 'type': 'Bug', 'item': 'Timeout on Save', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-20 09:11', 'type': 'Epic', 'item': 'Platform Modernization', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-17 14:51', 'type': 'Feature', 'item': 'Search Experience', 'link': '#', 'note': 'Scope clarified after review with stakeholders.'}, {'dt': '2026-04-18 11:18', 'type': 'Epic', 'item': 'Security Hardening', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-16 09:51', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-18', 'text': 'Updated after new delivery estimates were recorded.'}]}, {'id': 52, 'name': 'Vendor Integration Gateway', 'domain': 'Shared Services', 'type': 'Enhancement', 'status': 'Healthy', 'priority': 'P4', 'urgency': 'Low', 'effort': 'Large', 'risk': 'Low', 'sponsor': 'Claims Operations', 'created': '2025-08-03', 'updated': '2026-04-20', 'leads': ['Priya', 'Morgan'], 'owners': {'dev': ['Priya', 'Morgan', 'Taylor'], 'dba': ['Sam'], 'ba': ['Jordan'], 'tester': ['Taylor', 'Riley']}, 'metrics': {'total': 214, 'active': 17, 'blocked': 2, 'qa': 3, 'done': 175, 'openBugs': 7, 'donePercent': 82}, 'workBreakdown': {'epics': {'total': 2, 'new': 0, 'progress': 0, 'qa': 0, 'blocked': 0, 'done': 2}, 'features': {'total': 13, 'new': 1, 'progress': 1, 'qa': 0, 'blocked': 0, 'done': 11}, 'bugs': {'total': 43, 'new': 2, 'progress': 4, 'qa': 1, 'blocked': 1, 'done': 35}, 'tasks': {'total': 156, 'new': 7, 'progress': 13, 'qa': 4, 'blocked': 4, 'done': 128}}, 'adoLinks': {'project': '#', 'backlog': '#', 'active': '#', 'bugs': '#', 'blocked': '#'}, 'notes': [{'dt': '2026-04-21 10:11', 'type': 'Epic', 'item': 'Workflow Foundation', 'link': '#', 'note': 'Blocked work was reduced after dependency review.'}, {'dt': '2026-04-20 12:27', 'type': 'Feature', 'item': 'Bulk Import', 'link': '#', 'note': 'Still needs follow-up after QA feedback.'}, {'dt': '2026-04-18 16:51', 'type': 'Feature', 'item': 'Role Management', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-16 09:03', 'type': 'Bug', 'item': 'Access Drift', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}, {'dt': '2026-04-17 14:11', 'type': 'Bug', 'item': 'Export Failure', 'link': '#', 'note': 'Moved forward after triage approved the current direction.'}], 'timeline': [{'dt': '2026-04-20', 'text': 'Open work count shifted after latest sync from ADO.'}, {'dt': '2026-04-18', 'text': 'Project status reviewed and kept at Healthy.'}, {'dt': '2026-04-16', 'text': 'Project status reviewed and kept at Healthy.'}]}];
+let filteredProjects = [...projects];
+let selectedProjectId = null;
+
+function fmtDate(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"});
+}
+function getAllLeads() {
+  return [...new Set(projects.flatMap(p => p.leads))].sort();
+}
+function ownerFilterSetup() {
+  const sel = document.getElementById("ownerFilter");
+  sel.innerHTML = '<option value="ALL">All Leads</option>' + getAllLeads().map(l => `<option>${l}</option>`).join("");
+}
+function priorityRank(p) {
+  return {P1:1,P2:2,P3:3,P4:4}[p] ?? 9;
+}
+
+function applyFilters() {
+  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  const status = document.getElementById("statusFilter").value;
+  const type = document.getElementById("typeFilter").value;
+  const priority = document.getElementById("priorityFilter").value;
+  const owner = document.getElementById("ownerFilter").value;
+  const sortBy = document.getElementById("sortBy").value;
+
+  filteredProjects = projects.filter(p => {
+    const hay = [
+      p.name, p.domain, p.type, p.status, p.priority, p.urgency, p.effort, p.risk, p.sponsor,
+      ...p.leads, ...p.owners.dev, ...p.owners.dba, ...p.owners.ba, ...p.owners.tester
+    ].join(" ").toLowerCase();
+
+    return (!q || hay.includes(q))
+      && (status === "ALL" || p.status === status)
+      && (type === "ALL" || p.type === type)
+      && (priority === "ALL" || p.priority === priority)
+      && (owner === "ALL" || p.leads.includes(owner));
+  });
+
+  filteredProjects.sort((a,b) => {
+    switch(sortBy) {
+      case "updated": return new Date(b.updated) - new Date(a.updated);
+      case "donePercent": return b.metrics.donePercent - a.metrics.donePercent;
+      case "blocked": return b.metrics.blocked - a.metrics.blocked;
+      case "openBugs": return b.metrics.openBugs - a.metrics.openBugs;
+      case "active": return b.metrics.active - a.metrics.active;
+      case "priority":
+      default:
+        return priorityRank(a.priority) - priorityRank(b.priority) || new Date(b.updated) - new Date(a.updated);
+    }
+  });
+
+  if (!filteredProjects.some(p => p.id === selectedProjectId)) {
+    selectedProjectId = filteredProjects[0]?.id ?? null;
   }
-];
 
-for(let i=4;i<=30;i++){
-  const total = Math.floor(Math.random()*500)+50;
-  const done = Math.floor(total * (0.45 + Math.random()*0.45));
-  projects.push({
-    id:i,
-    name:"Project " + i + (i % 5 === 0 ? " With A Much Longer Name To Test Alignment" : ""),
-    domain:["Finance","Claims","Security","Mobile","BI / Data"][Math.floor(Math.random()*5)],
-    status:["Healthy","At Risk","Blocked"][Math.floor(Math.random()*3)],
-    priority:["P1","P2","P3"][Math.floor(Math.random()*3)],
-    urgency:["High","Medium","Low"][Math.floor(Math.random()*3)],
-    updated:"2026-04-" + String(10 + Math.floor(Math.random()*12)).padStart(2,"0"),
-    metrics:{
-      total,
-      done,
-      active:Math.floor(Math.random()*100),
-      blocked:Math.floor(Math.random()*20)
-    },
-    notes:[
-      { dt:"2026-04-18 10:00", text:"Update made." },
-      { dt:"2026-04-15 09:30", text:"Reviewed." }
-    ]
-  });
+  renderRows();
+  renderDrawer();
+  renderStats();
 }
 
-let selected = null;
-
-function statusClass(status){
-  if(status === "Healthy") return "status-Healthy";
-  if(status === "At Risk") return "status-AtRisk";
-  return "status-Blocked";
-}
-
-function render(){
-  const rows = document.getElementById("rows");
-  rows.innerHTML = "";
-
-  projects.forEach(p => {
-    const row = document.createElement("div");
-    row.className = "row" + (selected === p.id ? " selected" : "");
-    const percent = Math.round((p.metrics.done / p.metrics.total) * 100);
-
-    row.innerHTML = `
-      <div class="project-cell">
-        <div class="project-name">${p.name}</div>
-        <div class="project-meta">${p.domain}</div>
+function segmentedBar(metrics) {
+  const total = metrics.total || 1;
+  const parts = [
+    ["new", Math.max(0, total - metrics.done - metrics.active - metrics.qa - metrics.blocked)],
+    ["progress", metrics.active],
+    ["qa", metrics.qa],
+    ["blocked", metrics.blocked],
+    ["done", metrics.done]
+  ];
+  return `
+    <div class="progress-stack">
+      <div class="progress-bar">
+        ${parts.map(([cls,val]) => {
+          const w = Math.max(0, (val/total)*100);
+          return `<div class="seg-${cls}" style="width:${w}%"></div>`;
+        }).join("")}
       </div>
-
-      <div class="cell-text ${statusClass(p.status)}">${p.status}</div>
-      <div class="cell-text">${p.priority}</div>
-      <div class="cell-text">${p.urgency}</div>
-      <div class="cell-text">${p.updated}</div>
-
-      <div class="progress-wrap">
-        <div class="percent">${percent}%</div>
-        <div class="bar">
-          <div class="fill" style="width:${percent}%"></div>
-        </div>
-      </div>
-    `;
-
-    row.onclick = () => {
-      selected = p.id;
-      render();
-      showDetails(p);
-    };
-
-    rows.appendChild(row);
-  });
-}
-
-function showDetails(p){
-  const d = document.getElementById("drawer");
-  d.innerHTML = `
-    <h3>${p.name}</h3>
-    <p><strong>Status:</strong> ${p.status}</p>
-    <p><strong>Priority:</strong> ${p.priority}</p>
-    <p><strong>Urgency:</strong> ${p.urgency}</p>
-    <p><strong>Updated:</strong> ${p.updated}</p>
-
-    <h4>Metrics</h4>
-    <p>Total: ${p.metrics.total}</p>
-    <p>Done: ${p.metrics.done}</p>
-    <p>Active: ${p.metrics.active}</p>
-    <p>Blocked: ${p.metrics.blocked}</p>
-
-    <h4>Notes</h4>
-    ${p.notes.map(n => `<div class="note">${n.dt} - ${n.text}</div>`).join("")}
+      <div class="percent">${metrics.donePercent}% done</div>
+    </div>
   `;
 }
 
-render();
-</script>
+function renderRows() {
+  const rows = document.getElementById("rows");
+  rows.innerHTML = filteredProjects.map(p => `
+    <div class="row ${selectedProjectId===p.id ? 'selected':''}" data-id="${p.id}">
+      <div class="project-cell">
+        <div class="project-title-wrap">
+          <span class="pill priority-${p.priority}">${p.priority}</span>
+          <div style="min-width:0">
+            <div class="project-name">${p.name}</div>
+            <div class="project-meta">${p.domain} • ${p.sponsor}</div>
+          </div>
+        </div>
+      </div>
+      <div><span class="pill type-chip-${p.type}">${p.type}</span></div>
+      <div><span class="mini status-${p.status}">${p.status}</span></div>
+      <div><span class="mini">${p.priority}</span></div>
+      <div><span class="mini">${p.urgency}</span></div>
+      <div class="hide-md"><span class="mini">${p.leads.join(", ")}</span></div>
+      <div class="hide-md"><span class="mini">${fmtDate(p.updated)}</span></div>
+      <div class="hide-md"><span class="mini">${p.metrics.active} active</span></div>
+      <div class="hide-md">${segmentedBar(p.metrics)}</div>
+      <div class="hide-md"><span class="mini">${p.metrics.blocked}</span></div>
+      <div><a class="link-btn" href="${p.adoLinks.project}" onclick="event.stopPropagation()">Open</a></div>
+    </div>
+  `).join("");
 
+  [...rows.querySelectorAll(".row")].forEach(el => {
+    el.addEventListener("click", () => {
+      selectedProjectId = Number(el.dataset.id);
+      renderRows();
+      renderDrawer();
+    });
+  });
+
+  document.getElementById("portfolioSummary").textContent = `${filteredProjects.length} projects shown • ${projects.length} total in portfolio`;
+}
+
+function renderStats() {
+  const stats = document.getElementById("statsbar");
+  const aggregate = filteredProjects.reduce((acc,p) => {
+    acc.active += p.metrics.active;
+    acc.blocked += p.metrics.blocked;
+    acc.openBugs += p.metrics.openBugs;
+    acc.newApps += p.type === "New Application" ? 1 : 0;
+    acc.updates += (p.type === "Enhancement" || p.type === "Bug Fix" || p.type === "Mixed") ? 1 : 0;
+    acc.p1 += p.priority === "P1" ? 1 : 0;
+    return acc;
+  }, {active:0, blocked:0, openBugs:0, newApps:0, updates:0, p1:0});
+
+  stats.innerHTML = `
+    <div class="stat">${aggregate.newApps} new applications in flight</div>
+    <div class="stat">${aggregate.updates} update / maintenance projects</div>
+    <div class="stat">${aggregate.active} active items</div>
+    <div class="stat">${aggregate.blocked} blocked items</div>
+    <div class="stat">${aggregate.openBugs} open bugs</div>
+    <div class="stat">${aggregate.p1} P1 projects</div>
+  `;
+}
+
+function breakdownCard(title, data) {
+  return `
+    <div class="break-card">
+      <h4>${title}</h4>
+      <div class="break-row"><span>New</span><span>${data.new}</span></div>
+      <div class="break-row"><span>In Progress</span><span>${data.progress}</span></div>
+      <div class="break-row"><span>QA</span><span>${data.qa}</span></div>
+      <div class="break-row"><span>Blocked</span><span>${data.blocked}</span></div>
+      <div class="break-row"><span>Done</span><span>${data.done}</span></div>
+      <div class="break-row"><span>Total</span><span>${data.total}</span></div>
+    </div>
+  `;
+}
+
+function renderDrawer() {
+  const drawer = document.getElementById("drawer");
+  const p = filteredProjects.find(x => x.id === selectedProjectId);
+  if(!p) {
+    drawer.innerHTML = `<div class="drawer-empty">No matching project. Adjust filters to see results.</div>`;
+    return;
+  }
+
+  drawer.innerHTML = `
+    <div class="drawer-inner">
+      <h2>${p.name}</h2>
+      <div class="subtle">${p.domain} • ${p.type} • Sponsor: ${p.sponsor}</div>
+
+      <div class="section">
+        <h3>Project Header</h3>
+        <div class="details-grid">
+          <div class="detail-line"><strong>Status:</strong> <span class="status-${p.status}">${p.status}</span></div>
+          <div class="detail-line"><strong>Priority:</strong> ${p.priority}</div>
+          <div class="detail-line"><strong>Urgency:</strong> ${p.urgency}</div>
+          <div class="detail-line"><strong>Effort:</strong> ${p.effort}</div>
+          <div class="detail-line"><strong>Risk:</strong> ${p.risk}</div>
+          <div class="detail-line"><strong>Leads:</strong> ${p.leads.join(", ")}</div>
+          <div class="detail-line"><strong>Created:</strong> ${fmtDate(p.created)}</div>
+          <div class="detail-line"><strong>Last Updated:</strong> ${fmtDate(p.updated)}</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>High-Level Metrics</h3>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="label">Total Items</div><div class="value">${p.metrics.total.toLocaleString()}</div></div>
+          <div class="kpi"><div class="label">Active</div><div class="value">${p.metrics.active}</div></div>
+          <div class="kpi"><div class="label">Blocked</div><div class="value">${p.metrics.blocked}</div></div>
+          <div class="kpi"><div class="label">Open Bugs</div><div class="value">${p.metrics.openBugs}</div></div>
+        </div>
+        <div style="margin-top:10px">${segmentedBar(p.metrics)}</div>
+      </div>
+
+      <div class="section">
+        <h3>ADO Deep Links</h3>
+        <div class="link-cluster">
+          <a class="link-btn" href="${p.adoLinks.project}">Project</a>
+          <a class="link-btn" href="${p.adoLinks.backlog}">Backlog</a>
+          <a class="link-btn" href="${p.adoLinks.active}">Active Work</a>
+          <a class="link-btn" href="${p.adoLinks.bugs}">Open Bugs</a>
+          <a class="link-btn" href="${p.adoLinks.blocked}">Blocked Work</a>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Assigned Roles</h3>
+        <div class="owner-group"><div class="owner-title">Developers</div>${p.owners.dev.map(n=>`<span class="person">${n}</span>`).join("")}</div>
+        <div class="owner-group"><div class="owner-title">DBA</div>${p.owners.dba.map(n=>`<span class="person">${n}</span>`).join("")}</div>
+        <div class="owner-group"><div class="owner-title">Business Analysts</div>${p.owners.ba.map(n=>`<span class="person">${n}</span>`).join("")}</div>
+        <div class="owner-group"><div class="owner-title">Testers</div>${p.owners.tester.map(n=>`<span class="person">${n}</span>`).join("")}</div>
+      </div>
+
+      <div class="section">
+        <h3>Work Breakdown</h3>
+        <div class="breakdown">
+          ${breakdownCard("Epics", p.workBreakdown.epics)}
+          ${breakdownCard("Features", p.workBreakdown.features)}
+          ${breakdownCard("Bugs", p.workBreakdown.bugs)}
+          ${breakdownCard("Tasks", p.workBreakdown.tasks)}
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Recent Notes</h3>
+        <div class="notes">
+          ${p.notes.map(n => `
+            <div class="note">
+              <div class="note-top">
+                <div><span class="note-type">${n.type}</span> • <a href="${n.link}">${n.item}</a></div>
+                <div class="muted">${n.dt}</div>
+              </div>
+              <div>${n.note}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Timeline</h3>
+        <div class="timeline">
+          ${p.timeline.map(t => `
+            <div class="tl-item">
+              <div class="tl-date">${t.dt}</div>
+              <div>${t.text}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("statusFilter").addEventListener("change", applyFilters);
+document.getElementById("typeFilter").addEventListener("change", applyFilters);
+document.getElementById("priorityFilter").addEventListener("change", applyFilters);
+document.getElementById("ownerFilter").addEventListener("change", applyFilters);
+document.getElementById("sortBy").addEventListener("change", applyFilters);
+document.getElementById("resetBtn").addEventListener("click", () => {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("statusFilter").value = "ALL";
+  document.getElementById("typeFilter").value = "ALL";
+  document.getElementById("priorityFilter").value = "ALL";
+  document.getElementById("ownerFilter").value = "ALL";
+  document.getElementById("sortBy").value = "priority";
+  applyFilters();
+});
+
+ownerFilterSetup();
+selectedProjectId = projects[0].id;
+applyFilters();
+</script>
 </body>
 </html>
